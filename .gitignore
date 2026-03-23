@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.csv
+*.png
+Mors/
+Plots/
+Tables/
+Data_management/External_data/
+.idea/
+.DS_Store
+Thumbs.db
