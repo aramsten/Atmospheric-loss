@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import datetime
-from astropy.constants import R_sun, L_sun, sigma_sb, M_earth, R_earth, G
+from astropy.constants import  L_sun
 from astropy import units as u
 
 class Plot2D_creator():
@@ -129,8 +129,8 @@ class Plot3D_creator(Plot2D_creator):
 
     def add_norm(self):
         """Adds a LogNorm normalized to the closest powers of ten for all added meshes."""
-        vmin = 10.0 ** 3
-        vmax = 10.0 ** 8
+        vmin = np.min(self.z_mesh)
+        vmax = np.max(self.z_mesh)
 
         self.norm = colors.LogNorm(vmin=vmin, vmax=vmax)
 
