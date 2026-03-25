@@ -1,8 +1,5 @@
-astropy==7.1.1
 astropy==7.2.0
-astropy==7.0.0
 astroquery==0.4.11
 matplotlib==3.10.8
 numpy==2.4.3
 pyvo==1.8.1
-pyvo==1.8

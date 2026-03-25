@@ -1,7 +1,8 @@
 import pyvo
 import numpy as np
 from Data_management import file_manager as fm
-from Data_management import spectral_type_writer as stw
+from Data_management import column_creator as cc
+from Data_management import data_modifier as dm
 from astropy.table import Table, vstack
 from astropy import units as u
 from Data_management.planet_creator import make_earth_row
@@ -66,10 +67,12 @@ def main():
 
     catalog = download_NASA_exoplanet_catalog(selected_data)
     catalog = fm.filter_catalog(catalog, columns_to_clean) # Use catalog.colnames as second input if you want to clean everything, otherwise, define columns_to_clean
-    catalog = stw.spectral_type_from_teff(catalog, "st_teff")
-    catalog = stw.remove_spt(catalog, "SpT_PM", spectral_types_to_remove)
-    catalog = stw.assign_Lq_for_FGKM(catalog, "SpT_PM")
-    catalog = stw.assign_saturation_for_FGKM(catalog, "SpT_PM")
+    catalog = apply_units(catalog)
+    catalog = cc.spectral_type_from_teff(catalog, "st_teff")
+    catalog = dm.remove_spt(catalog, "SpT_PM", spectral_types_to_remove)
+
+    catalog = cc.assign_Lq_for_FGKM(catalog, "SpT_PM")
+    catalog = cc.assign_saturation_for_FGKM(catalog, "SpT_PM")
 
     ## Used for debugging
     #for col in ["pl_rade", "pl_masse", "st_rad", "pl_orbsmax"]:
@@ -80,6 +83,8 @@ def main():
     catalog.sort(['tic_id'])
     earth = make_earth_row(catalog)
     catalog = vstack([earth, catalog])
+    catalog = cc.add_escape_velocity(catalog, "pl_masse", "pl_rade")
+
     catalog = apply_units(catalog)
 
     return catalog

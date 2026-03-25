@@ -66,9 +66,10 @@ class Plot2D_creator():
                 s = 8,
                 alpha=1)
         for i in range(len(self.y_axis)):
-            plt.plot(self.x_axis,self.y_axis[i],label=label[i])
-            if self.error is not None and view_errorbar:
-                plt.errorbar(self.x_axis,self.y_axis[i],yerr=self.error[i], fmt='o', markersize=0, capsize=3, alpha=0.5)
+            if not plot_scatter:
+                plt.plot(self.x_axis,self.y_axis[i],label=label[i])
+                if self.error is not None and view_errorbar:
+                    plt.errorbar(self.x_axis,self.y_axis[i],yerr=self.error[i], fmt='o', markersize=0, capsize=3, alpha=0.5)
 
         if x_logscale:
             plt.xscale("log")

@@ -1,6 +1,8 @@
 from astropy.table import Table
 from astropy import units as u
 import numpy as np
+from Calculators import function_solvers as fs
+
 
 def spectral_type_from_teff(catalog, teff_colname):
     pm_table = Table.read("Data_management/External_data/EEM_dwarf_UBVIJHK_colors_Teff.txt",
@@ -65,6 +67,16 @@ def assign_saturation_for_FGKM(catalog, colname_spt):
     catalog["t_sat"] = t_sat*u.Gyr
     catalog["gamma"] = gamma
     return catalog
+
+def add_escape_velocity(catalog, colname_m_p, colname_r_p):
+    m_p = catalog[colname_m_p].to(u.kg)
+    r_p = catalog[colname_r_p].to(u.m)
+    v_esc = fs.calculate_escape_velocity(m_p, r_p)
+    print(v_esc.unit)
+    catalog["v_esc"] = v_esc.to(u.km/u.s)
+    catalog["v_esc"].format = ".1f"
+    return catalog
+
 
 def remove_spt(catalog, colname, spt_to_remove):
     spt_col = catalog[colname].astype(str)

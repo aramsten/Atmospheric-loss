@@ -77,7 +77,12 @@ def calculate_total_mass_loss(eta, m_p, r_xuv, r_p, l_bol, l_q, t_sat, t_end, ga
     total_f_xuv = calculate_stellar_fluxes(total_l_xuv, distances)
     total_mass_loss = eta*pi*r_xuv**2*r_p*total_f_xuv/(G*m_p)
     print(f"unit for mass loss at {t_end.to(u.Gyr)}: {total_mass_loss.decompose().unit}") ## Used for debugging
-    return total_mass_loss
+    return total_mass_loss, total_f_xuv, total_l_xuv
+
+def calculate_escape_velocity(m_p, r_p):
+    """Calculates the escape velocity"""
+    v_esc = np.sqrt(2*G*m_p/r_p)
+    return v_esc
 
 
 def integrate_l_xuv(catalog, lbol_col, lq_col, t_sat_col, t_end, steps):
