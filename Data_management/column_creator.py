@@ -72,7 +72,6 @@ def add_escape_velocity(catalog, colname_m_p, colname_r_p):
     m_p = catalog[colname_m_p].to(u.kg)
     r_p = catalog[colname_r_p].to(u.m)
     v_esc = fs.calculate_escape_velocity(m_p, r_p)
-    print(v_esc.unit)
     catalog["v_esc"] = v_esc.to(u.km/u.s)
     catalog["v_esc"].format = ".1f"
     return catalog

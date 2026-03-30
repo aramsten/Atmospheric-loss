@@ -5,7 +5,7 @@ from Data_management import column_creator as cc
 from Data_management import data_modifier as dm
 from astropy.table import Table, vstack
 from astropy import units as u
-from Data_management.planet_creator import make_earth_row
+from Data_management.planet_creator import make_earth_row, add_planets_from_star_system
 from astropy.constants import R_sun, L_sun, M_sun, M_earth, R_earth
 
 def download_NASA_exoplanet_catalog(query):
@@ -81,8 +81,28 @@ def main():
     #print(type(catalog["pl_orbsmax"][0]))
 
     catalog.sort(['tic_id'])
-    earth = make_earth_row(catalog)
-    catalog = vstack([earth, catalog])
+    #earth = make_earth_row(catalog)
+    #catalog = vstack([earth, catalog])
+
+    planets = ["Earth","Mercury","Venus","Mars"]
+    """
+    https://science.nasa.gov/mercury/facts/
+    https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
+    
+    
+    https://science.nasa.gov/earth/facts/
+    
+    https://science.nasa.gov/mars/facts/
+    https://www.esa.int/Science_Exploration/Space_Science/Mars_Express/Facts_about_Mars
+    https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/mars/
+    
+    
+    """
+    planet_masses = [1.0, 0.055, 0.814, 0.11]
+    planet_radii = [1.0, 0.383, 0.949, 0.533]
+    planet_distance = [1.0, 0.4, 0.72, 1.52]
+    catalog = add_planets_from_star_system(catalog, planets, planet_masses, planet_radii, planet_distance)
+
     catalog = cc.add_escape_velocity(catalog, "pl_masse", "pl_rade")
 
     catalog = apply_units(catalog)
