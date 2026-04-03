@@ -38,9 +38,6 @@ def atmospheric_escaperates_calculator(distances,r_xuv,eta,m_p,r_p,l_bol):
     l_xuv = calculate_l_xuv(l_bol)
     f_xuv = calculate_stellar_flux(l_xuv, distances)
     m_esc_dt = eta*pi*r_xuv**2*r_p*f_xuv/(G*m_p)
-    #print(f"Escape rate: {m_esc_dt[200][200]} kg/s")
-    #print(f"Max escape rate: {m_esc_dt.max():.2e} kg/s")
-    #print(f"Min escape rate: {m_esc_dt.min():.2e} kg/s")
     return m_esc_dt.value
 
 def calculate_stellar_flux(l_xuv, distance):

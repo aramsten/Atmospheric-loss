@@ -127,10 +127,12 @@ class Plot3D_creator(Plot2D_creator):
         """Sets the z_mesh to a calculated mesh of a function"""
         self.z_mesh = z_mesh
 
-    def add_norm(self):
+    def add_norm(self, vmin=None, vmax=None):
         """Adds a LogNorm normalized to the closest powers of ten for all added meshes."""
-        vmin = np.min(self.z_mesh)
-        vmax = np.max(self.z_mesh)
+        if vmin is None:
+            vmin = 10**np.floor(np.log10(np.min(self.z_mesh)))
+        if vmax is None:
+            vmax = 10**np.ceil(np.log10(np.max(self.z_mesh)))
 
         self.norm = colors.LogNorm(vmin=vmin, vmax=vmax)
 
@@ -179,6 +181,15 @@ class Six_3Dplot_creator(Plot3D_creator):
     def add_z_mesh(self,z_mesh):
         """Adds a z_mesh to the list of z_meshes"""
         self.z_meshes.append(z_mesh)
+
+    def add_norm(self, vmin=None, vmax=None):
+        """Adds a LogNorm normalized to the closest powers of ten for all added meshes."""
+        if vmin is None:
+            vmin = 10**np.floor(np.log10(np.min(self.z_meshes)))
+        if vmax is None:
+            vmax = 10**np.ceil(np.log10(np.max(self.z_meshes)))
+
+        self.norm = colors.LogNorm(vmin=vmin, vmax=vmax)
 
     def six_window_plot(self,planet):
         fig, axs = plt.subplots(2, 3, figsize=(12, 8), constrained_layout=True)
