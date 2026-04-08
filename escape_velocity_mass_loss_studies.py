@@ -63,7 +63,7 @@ def plot_loss(catalog, colname, t, R_xuv, eta, output, proto_mass_frac, normaliz
         percent_label = ""
         planet_label = "planet"
 
-    proto_mass_frac_text = f"{proto_mass_frac}%" if output == "fraction" and not normalize else ""
+        proto_mass_frac_text = f"{proto_mass_frac*100 :.0f}%" if output == "fraction" and not normalize else ""
 
 
     nominator = rf"$M_{{\mathrm{{loss}}{percent_label}}}$({t}) Gyr"
@@ -96,7 +96,6 @@ def plot_loss(catalog, colname, t, R_xuv, eta, output, proto_mass_frac, normaliz
 def main():
     table_name = "260330_14.36_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
     loss_table = ascii.read(f"Tables/{table_name}")
-    print(loss_table)
 
     R_xuv = 1.2  # dimensionless ratio >= 1
     eta = 0.1  # dimensionless heating efficiency
