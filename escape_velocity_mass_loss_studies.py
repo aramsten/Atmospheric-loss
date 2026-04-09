@@ -3,13 +3,9 @@ import Plot_tools.plot_modifier as pm
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import ascii
-from astropy import units as u
 
-
-
-def plot_cosmic_shoreline(catalog, colname, t, R_xuv, eta):
+def plot_cosmic_shoreline(catalog, colname, y_label):
     x_label = "Escape velocity (km/s)"
-    y_label = f"Insolation relative to Earth at {t} Gyr"
 
     x_axis = catalog["v_esc"]
     y_axis = catalog[colname]
@@ -30,7 +26,7 @@ def plot_cosmic_shoreline(catalog, colname, t, R_xuv, eta):
     pm.set_log_axis_base_ten(ax)
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
 
-    save_plot(plot,"ST",f"cosmic_shoreline-{shoreline_position_text}-at-t={t}Gyr-rxuv_factor={R_xuv}-eta={eta}")
+    return plot, shoreline_position_text
 
 def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", factor_over_reference=1.1, vmin=4, vmax=100):
     reference_idx = np.where(catalog[planetname_column] == reference)[0][0]
@@ -47,32 +43,18 @@ def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", ref
     else:
         shoreline_position_text = f"at-{factor_over_reference}-{reference}-insolation"
 
-    return shoreline_position_text
+    return shoreline_position_text, shoreline_position_text
 
-def plot_loss(catalog, colname, t, R_xuv, eta, output, proto_mass_frac, normalize):
+def plot_loss(catalog, colname, y_label, normalize):
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
     x_axis = catalog["v_esc"]
     if normalize:
         y_axis = catalog[colname] / catalog[colname][earth_idx]
-        norm_text = "-normalised-to-earth-percent-"
-        percent_label = r"\%"
-        planet_label = "loss,earth,"
+
     else:
         y_axis = catalog[colname]
-        norm_text = "-"
-        percent_label = ""
-        planet_label = "planet"
-
-        proto_mass_frac_text = f"{proto_mass_frac*100 :.0f}%" if output == "fraction" and not normalize else ""
-
-
-    nominator = rf"$M_{{\mathrm{{loss}}{percent_label}}}$({t}) Gyr"
-    denomininator = rf"{proto_mass_frac_text} $M_{{\mathrm{{{planet_label}}}{percent_label}}}$"
 
     x_label = "Escape velocity (km/s)"
-    y_label = rf"{nominator} / {denomininator}"
-
-
 
     plt.figure()
     plot_creator = Plot2D_creator(x_axis)
@@ -90,19 +72,20 @@ def plot_loss(catalog, colname, t, R_xuv, eta, output, proto_mass_frac, normaliz
 
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
 
-    save_plot(plot, "ST", f"mass-loss-{proto_mass_frac_text}{norm_text}at-t={t}Gyr-rxuv_factor={R_xuv}-eta={eta}")
+    return plot
 
 
 def main():
-    table_name = "260330_14.36_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
-    loss_table = ascii.read(f"Tables/{table_name}")
+    table_name = "260409_22.25_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
+    catalog = ascii.read(f"Tables/{table_name}")
+    initials = "ST"
 
     R_xuv = 1.2  # dimensionless ratio >= 1
     eta = 0.1  # dimensionless heating efficiency
     protoatmosphere_mass_fraction = 0.01
     output = "fraction" # "mass" or "fraction"
     loss_plot = True
-    normalise_loss = False
+    normalize_loss = False
     shoreline_plot = True
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
 
@@ -116,10 +99,55 @@ def main():
             raise ValueError("output must be 'mass' or 'fraction'")
         colname_insol = f"insol_{t}_Gyr"
     
+        if loss_plot:
+            if normalize_loss:
+                norm_text = "-normalised-to-earth-percent-"
+                percent_label = r"\%"
+                planet_label = "loss,earth,"
+            else:
+                norm_text = "-"
+                percent_label = ""
+                planet_label = "planet"
 
-        plot_loss(loss_table, colname_loss, t, R_xuv, eta, output, protoatmosphere_mass_fraction, normalise_loss) if loss_plot else None
-        plot_cosmic_shoreline(loss_table, colname_insol, t, R_xuv, eta) if shoreline_plot else None
+                proto_mass_frac_text = f"{protoatmosphere_mass_fraction*100 :.0f}%" if output == "fraction" and not normalize_loss else ""
 
+                nominator = rf"$M_{{\mathrm{{loss}}{percent_label}}}$({t}) Gyr"
+                denomininator = rf"{proto_mass_frac_text} $M_{{\mathrm{{{planet_label}}}{percent_label}}}$"
+
+                y_label = rf"{nominator} / {denomininator}"
+                loss_plot = plot_loss(catalog, colname_loss, y_label, normalize_loss)
+                save_plot(loss_plot, initials, f"mass-loss-{proto_mass_frac_text}{norm_text}at-t={t}Gyr-rxuv_factor={R_xuv}-eta={eta}")
+
+        if shoreline_plot:
+            y_label = f"Insolation relative to Earth at {t} Gyr"
+            cosmic_shoreline_plot, shoreline_position_text = plot_cosmic_shoreline(catalog, colname_insol, y_label)
+            save_plot(cosmic_shoreline_plot, initials, f"cosmic_shoreline-{shoreline_position_text}-at-t={t}Gyr-rxuv_factor={R_xuv}-eta={eta}")
+    
+    if loss_plot:
+        colname_loss = f"Loss/0.01protoatm., star_lifetime"
+
+        if normalize_loss:
+            norm_text = "-normalised-to-earth-percent-"
+            percent_label = r"\%"
+            planet_label = "loss,earth,"
+        else:
+            norm_text = "-"
+            percent_label = ""
+            planet_label = "planet"
+
+            proto_mass_frac_text = f"{protoatmosphere_mass_fraction*100 :.0f}%" if output == "fraction" and not normalize_loss else ""
+
+            nominator = rf"$M_{{\mathrm{{loss}}{percent_label}}}$"
+            denomininator = rf"{proto_mass_frac_text} $M_{{\mathrm{{{planet_label}}}{percent_label}}}$"
+
+            y_label = rf"{nominator} / {denomininator}"
+            loss_plot = plot_loss(catalog, colname_loss, y_label, normalize_loss)
+            save_plot(loss_plot, initials, f"mass-loss-{proto_mass_frac_text}{norm_text}at-t={t}Gyr-rxuv_factor={R_xuv}-eta={eta}")
+
+    if shoreline_plot:
+        y_label = f"Insolation relative to Earth during the planet's star lifetime"
+        colname_insol = f"insol_star_lifetime"
+        cosmic_shoreline_plot, shoreline_position_text = plot_cosmic_shoreline(catalog, colname_insol, y_label)
 
 if __name__ == "__main__":
     main()

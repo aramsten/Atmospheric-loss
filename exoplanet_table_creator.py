@@ -150,16 +150,16 @@ def add_loss_colums_star_lifetime(loss_table: Table, catalog: Table, R_xuv: floa
     loss = loss / pl_mass
 
     if output == "mass":
-        colname_loss = f"Loss/pl_mass, star lifetime"
+        colname_loss = f"Loss/pl_mass, star_lifetime"
     elif output == "fraction":
         loss = loss / protoatmosphere_mass_fraction
-        colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., star lifetime"
+        colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., star_lifetime"
     else:
         raise ValueError("output must be 'mass' or 'fraction'")
     loss_table[colname_loss] = loss.decompose()
     loss_table[colname_loss].format = ".5f"
 
-    colname_insol = f"insol_star lifetime"
+    colname_insol = f"insol_star_lifetime"
 
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
     insolation = f_xuv / f_xuv[earth_idx]
