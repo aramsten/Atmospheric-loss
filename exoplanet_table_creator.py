@@ -31,44 +31,141 @@ def total_loss_calculate_for_catalog(catalog, end_time, R_xuv, eta, protoatmosph
     loss_table.meta["R_xuv"] = R_xuv
     loss_table.meta["end_time"] = end_time
 
+    for t in end_time:
+        loss_table = add_loss_columns_specific_time(loss_table,catalog, t, R_xuv, eta, protoatmosphere_mass_fraction, output)
+    
+    loss_table = add_loss_colums_star_lifetime(loss_table, catalog, R_xuv, eta, protoatmosphere_mass_fraction, output)
+
+    return loss_table
+
+def add_loss_columns_specific_time(loss_table: Table, catalog: Table, end_time: float, R_xuv: float, eta: float, protoatmosphere_mass_fraction: float, output: str) -> Table:
+    """Add a colum to the table with the mass loss for a specific time
+
+    Parameters
+    ----------
+    loss_table: Table
+        the table to which the column will be added
+    catalog: Table
+        the original catalog with the planet data
+    end_time: float
+        the time at which to calculate the mass loss
+    R_xuv: float
+        the ratio of the XUV radius to the planet radius
+    eta: float
+        the heating efficiency
+    protoatmosphere_mass_fraction: float
+        the fraction of the planet's mass that is in the protoatmosphere
+    output: str
+        the type of output to calculate ("mass" or "fraction")
+
+    Returns
+    -------
+    loss_table: Table
+        the updated table with the added column"""
+    
     pl_mass = catalog["pl_masse"].to(u.kg)
     pl_rad = catalog["pl_rade"].to(u.m)
     pl_orb = catalog["pl_orbsmax"].to(u.m)
     t_sat = catalog["t_sat"].to(u.s)
     st_lum = catalog["st_lum"] * L_sun
 
-    for t in end_time:
-        loss, f_xuv, _ = calculate_total_mass_loss(eta,
-                                        pl_mass,
-                                        R_xuv * pl_rad,
-                                        pl_rad,
-                                        st_lum,
-                                        catalog["Lxuv/Lbol"],
-                                        t_sat,
-                                        (t * u.Gyr).to(u.s),
-                                        catalog["gamma"],
-                                        pl_orb)
+    loss, f_xuv, _ = calculate_total_mass_loss(eta,
+                                    pl_mass,
+                                    R_xuv * pl_rad,
+                                    pl_rad,
+                                    st_lum,
+                                    catalog["Lxuv/Lbol"],
+                                    t_sat,
+                                    (end_time * u.Gyr).to(u.s),
+                                    catalog["gamma"],
+                                    pl_orb)
 
-        # Normalised mass to planet mass:
-        loss = loss / pl_mass
+    # Normalised mass to planet mass:
+    loss = loss / pl_mass
 
-        if output == "mass":
-            colname_loss = f"Loss/pl_mass, t={t:.1f} Gyr"
-        elif output == "fraction":
-           loss = loss / protoatmosphere_mass_fraction
-           colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., t={t:.1f} Gyr"
-        else:
-            raise ValueError("output must be 'mass' or 'fraction'")
-        loss_table[colname_loss] = loss.decompose()
-        loss_table[colname_loss].format = ".5f"
+    if output == "mass":
+        colname_loss = f"Loss/pl_mass, t={end_time:.1f} Gyr"
+    elif output == "fraction":
+        loss = loss / protoatmosphere_mass_fraction
+        colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., t={end_time:.1f} Gyr"
+    else:
+        raise ValueError("output must be 'mass' or 'fraction'")
+    loss_table[colname_loss] = loss.decompose()
+    loss_table[colname_loss].format = ".5f"
 
-        colname_insol = f"insol_{t}_Gyr"
+    colname_insol = f"insol_{end_time}_Gyr"
 
-        earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
-        insolation = f_xuv / f_xuv[earth_idx]
+    earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
+    insolation = f_xuv / f_xuv[earth_idx]
 
-        loss_table[colname_insol] = insolation
-        loss_table[colname_insol].format = ".1f"
+    loss_table[colname_insol] = insolation
+    loss_table[colname_insol].format = ".1f"
+
+    return loss_table
+
+def add_loss_colums_star_lifetime(loss_table: Table, catalog: Table, R_xuv: float, eta: float, protoatmosphere_mass_fraction: float, output: str) -> Table:
+    """Add a colum to the table with the mass loss for a planet during its star entire lifetime
+    
+    Parameters
+    ----------
+    loss_table: Table
+        the table to which the column will be added
+    catalog: Table
+        the original catalog with the planet data
+    end_time: float
+        the time at which to calculate the mass loss
+    R_xuv: float
+        the ratio of the XUV radius to the planet radius
+    eta: float
+        the heating efficiency
+    protoatmosphere_mass_fraction: float
+        the fraction of the planet's mass that is in the protoatmosphere
+    output: str
+        the type of output to calculate ("mass" or "fraction")
+
+    Returns
+    -------
+    loss_table: Table
+        the updated table with the added column"""
+    
+    pl_mass = catalog["pl_masse"].to(u.kg)
+    pl_rad = catalog["pl_rade"].to(u.m)
+    pl_orb = catalog["pl_orbsmax"].to(u.m)
+    t_sat = catalog["t_sat"].to(u.s)
+    st_lum = catalog["st_lum"] * L_sun
+    st_age = catalog["st_age"].to(u.s)
+
+    loss, f_xuv, _ = calculate_total_mass_loss(eta,
+                                    pl_mass,
+                                    R_xuv * pl_rad,
+                                    pl_rad,
+                                    st_lum,
+                                    catalog["Lxuv/Lbol"],
+                                    t_sat,
+                                    st_age,
+                                    catalog["gamma"],
+                                    pl_orb)
+
+    # Normalised mass to planet mass:
+    loss = loss / pl_mass
+
+    if output == "mass":
+        colname_loss = f"Loss/pl_mass, star lifetime"
+    elif output == "fraction":
+        loss = loss / protoatmosphere_mass_fraction
+        colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., star lifetime"
+    else:
+        raise ValueError("output must be 'mass' or 'fraction'")
+    loss_table[colname_loss] = loss.decompose()
+    loss_table[colname_loss].format = ".5f"
+
+    colname_insol = f"insol_star lifetime"
+
+    earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
+    insolation = f_xuv / f_xuv[earth_idx]
+
+    loss_table[colname_insol] = insolation
+    loss_table[colname_insol].format = ".1f"
 
     return loss_table
 
