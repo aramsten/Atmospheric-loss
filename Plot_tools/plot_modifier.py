@@ -1,3 +1,4 @@
+from matplotlib.table import Table
 import numpy as np
 from matplotlib.ticker import ScalarFormatter, LogLocator
 
@@ -13,7 +14,24 @@ def set_log_axis_base_ten(ax, axis_to_modify="x"):
     axis.set_major_locator(LogLocator(base=10))
 
 
-def spectral_type_color_coder(catalog, colname="SpT_PM"):
+def spectral_type_color_coder(catalog: Table, colname="SpT_PM") -> list[str] | dict[str, str]:
+    """Assign colors to spectral types in the catalog based on the specified column.
+
+    Parameters
+    ----------
+    catalog : Table
+        The catalog containing the spectral type information.
+    colname : str, optional
+        The name of the column containing the spectral types (default is "SpT_PM").
+
+    Returns
+    -------
+    colors : list[str]
+        A list of colors corresponding to each row in the catalog based on spectral type.
+    spectral_colors : dict[str, str]
+        A dictionary mapping spectral types to their corresponding colors.
+    """
+
     colors = []
     spectral_colors = {
         "F": "blue",
@@ -28,7 +46,49 @@ def spectral_type_color_coder(catalog, colname="SpT_PM"):
 
     return colors, spectral_colors
 
-def apply_spectral_colors(ax, color_per_row, spectral_colors):
+def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01protoatm., star_age") -> list[str] | dict[str, str]:
+    """Assign colors to planets based on whether they have lost their primordial atmosphere or not.
+    
+    Parameters
+    ----------
+    catalog : Table
+        The catalog containing the atmospheric loss information.
+    colname : str, optional
+        The name of the column containing the atmospheric loss values (default is "Loss/0.01protoatm., star_age").
+
+    Returns
+    -------
+    colors : list[str]
+        A list of colors corresponding to each row in the catalog based on atmospheric loss.
+    loss_colors : dict[str, str]
+        A dictionary mapping atmospheric loss states to their corresponding colors.
+    """
+    colors = []
+    loss_colors = {
+        "removed": "green",
+        "preserved": "red"
+    }
+
+    for loss in catalog[colname]:
+        if loss > 1:  # Assuming positive values indicate removed atmosphere
+            colors.append("green")
+        else:
+            colors.append("red")
+    return colors, loss_colors
+
+def apply_colors(ax, color_per_row, spectral_colors):
+    """Apply colors to the points in the plot and create a legend.
+    
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes object to which the colors will be applied.
+    color_per_row : list[str]
+        A list of colors for each row in the catalog.
+    spectral_colors : dict[str, str]
+        A dictionary mapping types to their corresponding colors.
+    """
+
     points = ax.collections[0]
     points.set_facecolors(color_per_row)
 
