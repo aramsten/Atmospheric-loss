@@ -34,7 +34,7 @@ def total_loss_calculate_for_catalog(catalog, end_time, R_xuv, eta, protoatmosph
     for t in end_time:
         loss_table = add_loss_columns_specific_time(loss_table,catalog, t, R_xuv, eta, protoatmosphere_mass_fraction, output)
     
-    loss_table = add_loss_colums_star_lifetime(loss_table, catalog, R_xuv, eta, protoatmosphere_mass_fraction, output)
+    loss_table = add_loss_colums_star_age(loss_table, catalog, R_xuv, eta, protoatmosphere_mass_fraction, output)
 
     return loss_table
 
@@ -103,8 +103,8 @@ def add_loss_columns_specific_time(loss_table: Table, catalog: Table, end_time: 
 
     return loss_table
 
-def add_loss_colums_star_lifetime(loss_table: Table, catalog: Table, R_xuv: float, eta: float, protoatmosphere_mass_fraction: float, output: str) -> Table:
-    """Add a colum to the table with the mass loss for a planet during its star entire lifetime
+def add_loss_colums_star_age(loss_table: Table, catalog: Table, R_xuv: float, eta: float, protoatmosphere_mass_fraction: float, output: str) -> Table:
+    """Add a colum to the table with the mass loss for a planet up to the star's age
     
     Parameters
     ----------
@@ -150,16 +150,16 @@ def add_loss_colums_star_lifetime(loss_table: Table, catalog: Table, R_xuv: floa
     loss = loss / pl_mass
 
     if output == "mass":
-        colname_loss = f"Loss/pl_mass, star_lifetime"
+        colname_loss = f"Loss/pl_mass, star_age"
     elif output == "fraction":
         loss = loss / protoatmosphere_mass_fraction
-        colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., star_lifetime"
+        colname_loss = f"Loss/{protoatmosphere_mass_fraction}protoatm., star_age"
     else:
         raise ValueError("output must be 'mass' or 'fraction'")
     loss_table[colname_loss] = loss.decompose()
     loss_table[colname_loss].format = ".5f"
 
-    colname_insol = f"insol_star_lifetime"
+    colname_insol = f"insol_star_age"
 
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
     insolation = f_xuv / f_xuv[earth_idx]
