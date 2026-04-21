@@ -99,7 +99,7 @@ def add_loss_columns_specific_time(loss_table: Table, catalog: Table, end_time: 
     insolation = f_xuv / f_xuv[earth_idx]
 
     loss_table[colname_insol] = insolation
-    loss_table[colname_insol].format = ".1f"
+    loss_table[colname_insol].format = ".3f"
 
     return loss_table
 
@@ -165,7 +165,7 @@ def add_loss_colums_star_age(loss_table: Table, catalog: Table, R_xuv: float, et
     insolation = f_xuv / f_xuv[earth_idx]
 
     loss_table[colname_insol] = insolation
-    loss_table[colname_insol].format = ".1f"
+    loss_table[colname_insol].format = ".3f"
 
     return loss_table
 
@@ -183,7 +183,7 @@ def main():
 
     target = "catalog" # "catalog" or "new"
     catalog = total_loss_calculate_for_catalog(catalog, end_time, R_xuv, eta, protoatmosphere_mass_fraction, target, output)
-    save_catalog(catalog, "ST", description)
+    save_catalog(catalog, "AR", description)
     
 if __name__ == "__main__":
     main()
