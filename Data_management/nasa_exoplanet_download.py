@@ -35,6 +35,7 @@ def apply_units(catalog):
 def main():
     initials = "AR"
 
+    # To only use planets confirmed by TESS, use --> disc_facility LIKE '%TESS%' AND <-- under WHERE
     selected_data = '''
             SELECT
               pl_name,
@@ -52,9 +53,8 @@ def main():
             FROM
               pscomppars
             WHERE
-              disc_facility LIKE '%TESS%' AND
               sy_pnum >= 1 AND
-              sy_snum >= 1
+              sy_snum = 1
             '''
 
     columns_to_clean = ['tic_id',
@@ -89,6 +89,7 @@ def main():
     https://science.nasa.gov/mercury/facts/
     https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
     
+    https://www.esa.int/Science_Exploration/Space_Science/Venus_Express/Venus_compared_to_Earth
     
     https://science.nasa.gov/earth/facts/
     
