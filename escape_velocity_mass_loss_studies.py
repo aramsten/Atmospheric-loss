@@ -164,7 +164,7 @@ def main():
     #table_name = "260410_08.58_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
     table_name = "260422_02.20_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
     catalog = ascii.read(f"Tables/{table_name}")
-    initials = "AR"
+    initials = "ST"
 
     R_xuv = 1.2  # dimensionless ratio >= 1
     eta = 0.1  # dimensionless heating efficiency
@@ -175,8 +175,8 @@ def main():
     shoreline_plot = True
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
 
-    #for t in end_time:
-     #   specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
+    for t in end_time:
+        specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
     
     star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
 
