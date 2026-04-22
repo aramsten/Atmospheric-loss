@@ -91,7 +91,7 @@ def add_loss_columns_specific_time(loss_table: Table, catalog: Table, end_time: 
     else:
         raise ValueError("output must be 'mass' or 'fraction'")
     loss_table[colname_loss] = loss.decompose()
-    loss_table[colname_loss].format = ".5f"
+    loss_table[colname_loss].format = ".8f"
 
     colname_insol = f"insol_{end_time}_Gyr"
 
@@ -99,7 +99,7 @@ def add_loss_columns_specific_time(loss_table: Table, catalog: Table, end_time: 
     insolation = f_xuv / f_xuv[earth_idx]
 
     loss_table[colname_insol] = insolation
-    loss_table[colname_insol].format = ".3f"
+    loss_table[colname_insol].format = ".5f"
 
     return loss_table
 
@@ -157,7 +157,7 @@ def add_loss_colums_star_age(loss_table: Table, catalog: Table, R_xuv: float, et
     else:
         raise ValueError("output must be 'mass' or 'fraction'")
     loss_table[colname_loss] = loss.decompose()
-    loss_table[colname_loss].format = ".5f"
+    loss_table[colname_loss].format = ".8f"
 
     colname_insol = f"insol_star_age"
 
@@ -165,7 +165,7 @@ def add_loss_colums_star_age(loss_table: Table, catalog: Table, R_xuv: float, et
     insolation = f_xuv / f_xuv[earth_idx]
 
     loss_table[colname_insol] = insolation
-    loss_table[colname_insol].format = ".3f"
+    loss_table[colname_insol].format = ".5f"
 
     return loss_table
 
