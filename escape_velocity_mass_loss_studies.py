@@ -21,7 +21,7 @@ def plot_cosmic_shoreline_spectral_types(catalog, colname, y_label):
     shoreline_position_text = draw_shoreline(ax, catalog, x_axis, y_axis)
     pm.apply_colors(ax, color_per_row, spectral_colors)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars"}
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
     pm.set_log_axis_base_ten(ax)
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
@@ -45,7 +45,7 @@ def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
     shoreline_position_text = draw_shoreline(ax, catalog, x_axis, y_axis)
     pm.apply_colors(ax, color_per_row, spectral_colors)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars"}
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
     pm.set_log_axis_base_ten(ax)
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
@@ -90,7 +90,7 @@ def plot_loss(catalog, colname, y_label, normalize):
     ax = plot.gca()
     pm.apply_colors(ax, color_per_row, spectral_colors)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars"}
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
     pm.set_log_axis_base_ten(ax)
 
@@ -161,9 +161,10 @@ def star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction,
         save_plot(cosmic_shoreline_plot, initials, f"cosmic_shoreline-spectral_types-{shoreline_position_text}-at-t=star_age-rxuv_factor={R_xuv}-eta={eta}")
 
 def main():
-    table_name = "260410_08.58_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
+    #table_name = "260410_08.58_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
+    table_name = "260422_02.20_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
     catalog = ascii.read(f"Tables/{table_name}")
-    initials = "ST"
+    initials = "AR"
 
     R_xuv = 1.2  # dimensionless ratio >= 1
     eta = 0.1  # dimensionless heating efficiency
@@ -174,8 +175,8 @@ def main():
     shoreline_plot = True
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
 
-    for t in end_time:
-        specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
+    #for t in end_time:
+     #   specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
     
     star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
 
