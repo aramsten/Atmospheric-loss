@@ -135,4 +135,11 @@ def append_text_label(ax, catalog, colname, names, x_axis, y_axis,
             continue
         x = x_axis[i]
         y = y_axis[i]
+
+        # Nedan omvandlar x,y till float omm x,y är quantity
+        if hasattr(x, "to_value"):
+            x = x.to_value()
+        if hasattr(y, "to_value"):
+            y = y.to_value()
+
         ax.text(x*x_offset,y*y_offset,name,fontsize=fontsize,color=color,ha="left",va="bottom")
