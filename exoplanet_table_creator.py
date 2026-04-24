@@ -174,7 +174,7 @@ def main():
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
 
     output = "fraction" # "mass" or "fraction"
-    R_xuv = 1.2  # dimensionless ratio >= 1
+    R_xuv = 1.0  # dimensionless ratio >= 1
     eta = 0.1  # dimensionless heating efficiency
     protoatmosphere_mass_fraction = 0.01
     
@@ -183,7 +183,7 @@ def main():
 
     target = "catalog" # "catalog" or "new"
     catalog = total_loss_calculate_for_catalog(catalog, end_time, R_xuv, eta, protoatmosphere_mass_fraction, target, output)
-    save_catalog(catalog, "AR", description)
+    save_catalog(catalog, "AR", description, filetype="ecsv")
     
 if __name__ == "__main__":
     main()
