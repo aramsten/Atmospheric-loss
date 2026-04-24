@@ -1,4 +1,7 @@
 from Plot_tools.plot_creator import Plot2D_creator, save_plot
+from Calculators import function_solvers as fs
+from astropy.constants import L_sun, G
+from astropy import units as u
 import Plot_tools.plot_modifier as pm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,6 +31,38 @@ def plot_cosmic_shoreline_spectral_types(catalog, colname, y_label):
 
     return plot, shoreline_position_text
 
+def plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, colname, y_label, eta):
+    x_label = r"$v_\mathrm{esc}^3 \sqrt{\rho} / (v_\mathrm{esc\oplus}^3 \sqrt{\rho_\oplus})$"
+
+    earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
+    v_esc = catalog["v_esc"]
+    rho = 3*catalog["pl_masse"].to(u.kg)/(4*np.pi*(catalog["pl_rade"].to(u.m))**3)
+
+    v_earth = v_esc[earth_idx]
+    rho_earth = rho[earth_idx]
+    x_axis = (v_esc / v_earth) ** 3 * (rho / rho_earth)**0.5
+
+    y_axis = catalog[colname]
+
+    plt.figure()
+    plot_creator = Plot2D_creator(x_axis)
+    plot_creator.append_y_axis(y_axis)
+    plot = plot_creator.create_2D_plot(plot_scatter=True,x_label=x_label, y_label=y_label, label=catalog["pl_name"],x_logscale=True, y_logscale=True, view_legend=False)
+
+    color_per_row, spectral_colors = pm.spectral_type_color_coder(catalog, "SpT_PM")
+
+    ax = plot.gca()
+    pm.apply_colors(ax, color_per_row, spectral_colors)
+
+    draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis)
+
+
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
+    pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
+    pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+
+    return plot
+
 def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
     x_label = "Escape velocity (km/s)"
 
@@ -51,6 +86,93 @@ def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
 
     return plot, shoreline_position_text
+
+def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, colname, y_label, eta):
+    x_label = r"$v_\mathrm{esc}^3 \sqrt{\rho} / (v_\mathrm{esc\oplus}^3 \sqrt{\rho_\oplus})$"
+
+
+    earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
+    v_esc = catalog["v_esc"]
+    rho = 3*catalog["pl_masse"].to(u.kg)/(4*np.pi*(catalog["pl_rade"].to(u.m))**3)
+
+    v_earth = v_esc[earth_idx]
+    rho_earth = rho[earth_idx]
+    x_axis = (v_esc / v_earth) ** 3 * (rho / rho_earth)**0.5
+
+    y_axis = catalog[colname]
+
+    plt.figure()
+    plot_creator = Plot2D_creator(x_axis)
+    plot_creator.append_y_axis(y_axis)
+    plot = plot_creator.create_2D_plot(plot_scatter=True,x_label=x_label, y_label=y_label, label=catalog["pl_name"],x_logscale=True, y_logscale=True, view_legend=False)
+
+    color_per_row, spectral_colors = pm.removed_primordal_atmosphere_color_coder(catalog, "Loss/0.01protoatm., star_age")
+
+    ax = plot.gca()
+    pm.apply_colors(ax, color_per_row, spectral_colors)
+
+    draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis)
+
+
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
+    pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
+    pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+
+    return plot
+
+def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis):
+    x_min, x_max = x_axis.min().value, x_axis.max().value
+
+    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
+    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
+
+    earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
+
+    d = catalog["pl_orbsmax"].to(u.m)
+    lum = catalog["st_lum"]*L_sun
+    lq = catalog["Lxuv/Lbol"]
+    t_sat = catalog["t_sat"].to(u.s)
+    age = catalog["st_age"].to(u.s)
+    gamma = catalog["gamma"]
+
+    d_earth = d[earth_idx]
+    lum_sun = lum[earth_idx]
+    lq_sun = lq[earth_idx]
+    t_sat_sun = t_sat[earth_idx]
+    age_sun = age[earth_idx]
+    gamma_sun = gamma[earth_idx]
+
+    E_xuv_sun = fs.calculate_total_l_xuv(lum_sun, lq_sun, t_sat_sun, age_sun, gamma_sun)
+
+    v_esc = catalog["v_esc"].to(u.m/u.s)
+    rho = 3*catalog["pl_masse"].to(u.kg)/(4*np.pi*(catalog["pl_rade"].to(u.m))**3)
+    v_earth = v_esc[earth_idx]
+    rho_earth = rho[earth_idx]
+
+    fractions = [2e-4, 2e-3, 1e-2, 2e-1]
+
+    x_vals = np.logspace(np.log10(x_axis.min().value),
+                         np.log10(x_axis.max().value), 100) * x_axis.unit
+
+    ax = plt.gca()
+
+    for f in fractions:
+        m = (d_earth ** 2 / (eta * E_xuv_sun)) * (8 * np.pi / (3 * G))**0.5 * f *(v_earth) ** 3 * (rho_earth)**0.5
+        y_line = m * x_vals.value
+        ax.plot(x_vals, y_line, linestyle="--", color="black", alpha=0.5, zorder=1)
+        x_pos = x_vals.value[3]
+        y_pos = y_line[3]
+        ax.text(x_pos, y_pos, rf"$\Delta M = {f}$",
+                fontsize=8,
+                va="center",
+                ha="center",
+                rotation =38,
+                zorder=2,
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1)
+                )
+        ax.set_xlim(x_min * 0.5, 1e5)
+        ax.set_ylim(1e-3, y_max * 2)
+
 
 def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", factor_over_reference=1.1, vmin=4, vmax=100):
     reference_idx = np.where(catalog[planetname_column] == reference)[0][0]
@@ -162,11 +284,13 @@ def star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction,
 
 def main():
     #table_name = "260410_08.58_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
-    table_name = "260422_02.20_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
-    catalog = ascii.read(f"Tables/{table_name}")
-    initials = "ST"
+   # table_name = "260423_23.47_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
+    table_name = "260424_00.26_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
-    R_xuv = 1.2  # dimensionless ratio >= 1
+    catalog = ascii.read(f"Tables/{table_name}")
+    initials = "AR"
+
+    R_xuv = 1.0  # dimensionless ratio >= 1
     eta = 0.1  # dimensionless heating efficiency
     protoatmosphere_mass_fraction = 0.01
     output = "fraction" # "mass" or "fraction"
@@ -175,14 +299,20 @@ def main():
     shoreline_plot = True
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
 
-    for t in end_time:
-        specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
+  #  for t in end_time:
+  #      specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
     
-    star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
+#    star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
 
-    plot, shoreline_position_text = plot_cosmic_shoreline_lost_primordial(catalog, "insol_star_age", "Insolation relative to Earth")
-    save_plot(plot, initials, f"cosmic_shoreline-lost_primordial-{shoreline_position_text}-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")
-    
+  #  plot, shoreline_position_text = plot_cosmic_shoreline_lost_primordial(catalog, "insol_star_age", "Insolation relative to Earth")
+  #  save_plot(plot, initials, f"cosmic_shoreline-lost_primordial-{shoreline_position_text}-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")
+
+    plot = plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, "insol_star_age","Insolation relative to Earth", eta)
+    save_plot(plot, initials,f"cosmic_shoreline-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")
+
+    plot = plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, "insol_star_age","Insolation relative to Earth", eta)
+    save_plot(plot, initials, f"cosmic_shoreline-at-stars_age_lost_primordial-rxuv_factor={R_xuv}-eta={eta}")
+
 
 if __name__ == "__main__":
     main()
