@@ -221,4 +221,4 @@ def save_plot(plt,initials,plot_name, folder="Plots"):
   # Creates folder if not existing:
   os.makedirs(folder, exist_ok=True)
 
-  plt.savefig(f"{folder}/{today}_{initials}_Plot_{plot_name}.png", bbox_inches='tight')
+  plt.savefig(f"{folder}/{today}_{initials}_Plot_{plot_name}.png", bbox_inches='tight', dpi=300)
