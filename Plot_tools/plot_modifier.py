@@ -129,7 +129,7 @@ def set_point_size_for_names(ax, catalog, name_column, names, color_per_row,
 
 def append_text_label(ax, catalog, colname, names, x_axis, y_axis,
                       x_offset=1.05, y_offset=1.02,
-                      color="green", fontsize=8):
+                      color="black", fontsize=8):
     for i, name in enumerate(catalog[colname]):
         if name not in names:
             continue
