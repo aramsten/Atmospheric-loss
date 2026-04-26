@@ -73,31 +73,16 @@ def main():
 
     catalog = cc.assign_Lq_for_FGKM(catalog, "SpT_PM")
     catalog = cc.assign_saturation_for_FGKM(catalog, "SpT_PM")
-
-    ## Used for debugging
-    #for col in ["pl_rade", "pl_masse", "st_rad", "pl_orbsmax"]:
-    #    print(col, catalog[col].unit, type(catalog[col].unit))
-    #print(type(catalog["pl_orbsmax"]))
-    #print(type(catalog["pl_orbsmax"][0]))
+    catalog = cc.assign_gamma_for_FGKM(catalog, "SpT_PM")
 
     catalog.sort(['tic_id'])
-    #earth = make_earth_row(catalog)
-    #catalog = vstack([earth, catalog])
 
     planets = ["Earth","Mercury","Venus","Mars"]
     """
-    https://science.nasa.gov/mercury/facts/
+    Data sources:
     https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
-    
     https://www.esa.int/Science_Exploration/Space_Science/Venus_Express/Venus_compared_to_Earth
-    
-    https://science.nasa.gov/earth/facts/
-    
-    https://science.nasa.gov/mars/facts/
     https://www.esa.int/Science_Exploration/Space_Science/Mars_Express/Facts_about_Mars
-    https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/mars/
-    
-    
     """
     planet_masses = [1.0, 0.055, 0.814, 0.11]
     planet_radii = [1.0, 0.383, 0.949, 0.533]

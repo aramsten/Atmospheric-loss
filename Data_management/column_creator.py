@@ -44,27 +44,37 @@ def assign_Lq_for_FGKM(catalog, colname_spt):
     catalog["Lxuv/Lbol"] = ratio
     return catalog
 
-def assign_saturation_for_FGKM(catalog, colname_spt):
+def assign_saturation_for_FGKM(catalog, colname_spt, sat_F=0.1, sat_G=0.1, sat_K=0.1, sat_M=0.6):
     spt_col = catalog[colname_spt].astype(str)
-
     t_sat = np.zeros(len(spt_col))
+
+    for i, val in enumerate(spt_col):
+        if val.startswith("F"):
+            t_sat[i] = sat_F # Gyr
+        elif val.startswith("G"):
+            t_sat[i] = sat_G # Gyr
+        elif val.startswith("K"):
+            t_sat[i] = sat_K # Gyr
+        elif val.startswith("M"):
+            t_sat[i] = sat_M # Gyr
+
+    catalog["t_sat"] = t_sat*u.Gyr
+    return catalog
+
+def assign_gamma_for_FGKM(catalog, colname_spt, gamma_F=1.23, gamma_G=1.23, gamma_K=1.23, gamma_M=1.23):
+    spt_col = catalog[colname_spt].astype(str)
     gamma = np.zeros(len(spt_col))
 
     for i, val in enumerate(spt_col):
         if val.startswith("F"):
-            t_sat[i] = 0.1 # Gyr
-            gamma[i] = 1.23
+            gamma[i] = gamma_F
         elif val.startswith("G"):
-            t_sat[i] = 0.1 # Gyr
-            gamma[i] = 1.23
+            gamma[i] = gamma_G
         elif val.startswith("K"):
-            t_sat[i] = 0.1 # Gyr
-            gamma[i] = 1.23
+            gamma[i] = gamma_K
         elif val.startswith("M"):
-            t_sat[i] = 0.6 # Gyr
-            gamma[i] = 1.23
+            gamma[i] = gamma_M
 
-    catalog["t_sat"] = t_sat*u.Gyr
     catalog["gamma"] = gamma
     return catalog
 
