@@ -32,16 +32,15 @@ def plot_cosmic_shoreline_spectral_types(catalog, colname, y_label):
     return plot, shoreline_position_text
 
 def plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, colname, y_label, eta):
-    x_label = r"$v_\mathrm{esc}^3 \sqrt{\rho} / (v_\mathrm{esc\oplus}^3 \sqrt{\rho_\oplus})$"
+    x_label = r"$x = (v_\mathrm{esc}/v_\mathrm{esc\oplus})^3 (\rho / \rho_\oplus)^{0.5}$"
 
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
     v_esc = catalog["v_esc"]
     rho = 3*catalog["pl_masse"].to(u.kg)/(4*np.pi*(catalog["pl_rade"].to(u.m))**3)
 
-    v_earth = v_esc[earth_idx]
+    v_earth = v_esc.quantity[earth_idx]
     rho_earth = rho[earth_idx]
     x_axis = (v_esc / v_earth) ** 3 * (rho / rho_earth)**0.5
-
     y_axis = catalog[colname]
 
     plt.figure()
@@ -54,12 +53,20 @@ def plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, colname, y_lab
     ax = plot.gca()
     pm.apply_colors(ax, color_per_row, spectral_colors)
 
-    draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis)
+    x_vals_raw = x_axis.value if hasattr(x_axis, "value") else x_axis
+    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
+    x_min, x_max = np.nanmin(x_vals_raw), np.nanmax(x_vals_raw)
+    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
+    ax.set_xlim(x_min * 0.5, 1e5)
+    ax.set_ylim(1e-3, y_max * 2)
 
+    mass_fractions = [2e-4, 2e-3, 1e-2, 2e-1]
+    draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, mass_fractions)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+    ax.grid(False, which='minor')
 
     return plot
 
@@ -88,17 +95,16 @@ def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
     return plot, shoreline_position_text
 
 def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, colname, y_label, eta):
-    x_label = r"$v_\mathrm{esc}^3 \sqrt{\rho} / (v_\mathrm{esc\oplus}^3 \sqrt{\rho_\oplus})$"
+    x_label = r"$x = (v_\mathrm{esc}/v_\mathrm{esc\oplus})^3 (\rho / \rho_\oplus)^{0.5}$"
 
 
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
     v_esc = catalog["v_esc"]
     rho = 3*catalog["pl_masse"].to(u.kg)/(4*np.pi*(catalog["pl_rade"].to(u.m))**3)
 
-    v_earth = v_esc[earth_idx]
+    v_earth = v_esc.quantity[earth_idx]
     rho_earth = rho[earth_idx]
     x_axis = (v_esc / v_earth) ** 3 * (rho / rho_earth)**0.5
-
     y_axis = catalog[colname]
 
     plt.figure()
@@ -111,21 +117,24 @@ def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog
     ax = plot.gca()
     pm.apply_colors(ax, color_per_row, spectral_colors)
 
-    draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis)
+    x_vals_raw = x_axis.value if hasattr(x_axis, "value") else x_axis
+    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
+    x_min, x_max = np.nanmin(x_vals_raw), np.nanmax(x_vals_raw)
+    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
+    ax.set_xlim(x_min * 0.5, 1e5)
+    ax.set_ylim(1e-3, y_max * 2)
 
+    mass_fractions = [2e-4, 2e-3, 1e-2, 2e-1]
+    draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, mass_fractions)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
+    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+    ax.grid(False, which='minor')
 
     return plot
 
-def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis):
-    x_min, x_max = x_axis.min().value, x_axis.max().value
-
-    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
-    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
-
+def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, fractions):
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
 
     d = catalog["pl_orbsmax"].to(u.m)
@@ -149,19 +158,17 @@ def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis):
     v_earth = v_esc[earth_idx]
     rho_earth = rho[earth_idx]
 
-    fractions = [2e-4, 2e-3, 1e-2, 2e-1]
-
-    x_vals = np.logspace(np.log10(x_axis.min().value),
-                         np.log10(x_axis.max().value), 100) * x_axis.unit
+    xmin, xmax = ax.get_xlim()
+    x_vals = np.logspace(np.log10(xmin), np.log10(xmax), 200)
 
     ax = plt.gca()
 
     for f in fractions:
         m = (d_earth ** 2 / (eta * E_xuv_sun)) * (8 * np.pi / (3 * G))**0.5 * f *(v_earth) ** 3 * (rho_earth)**0.5
-        y_line = m * x_vals.value
+        y_line = m * x_vals
         ax.plot(x_vals, y_line, linestyle="--", color="black", alpha=0.5, zorder=1)
-        x_pos = x_vals.value[3]
-        y_pos = y_line[3]
+        x_pos = x_vals[11] if f != 0.0002 else x_vals[15]
+        y_pos = y_line[11] if f != 0.0002 else y_line[15]
         ax.text(x_pos, y_pos, rf"$\Delta M = {f}$",
                 fontsize=8,
                 va="center",
@@ -170,8 +177,6 @@ def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis):
                 zorder=2,
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1)
                 )
-        ax.set_xlim(x_min * 0.5, 1e5)
-        ax.set_ylim(1e-3, y_max * 2)
 
 
 def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", factor_over_reference=1.1, vmin=4, vmax=100):
@@ -284,7 +289,6 @@ def star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction,
 
 def main():
     #table_name = "260410_08.58_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
-   # table_name = "260423_23.47_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
     table_name = "260424_00.26_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
     catalog = ascii.read(f"Tables/{table_name}")
