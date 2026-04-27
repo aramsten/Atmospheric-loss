@@ -52,6 +52,8 @@ def main():
     star_shortname = "T1"
     model_name = "Birky 2022"
 
+    # Values that produce the lowest possible estimate goes first, nominal in the middle, and highest last.
+    # The ordering is important as variation id's are defined separately
     suffixes = ["Birky low", "Birky", "Birky high"]
     specific_lq = [10**-(3.03+0.25), 10**-3.03, 10**-(3.03-0.23)]
     specific_t_sat = [3.14-1.46, 3.14, 3.14+2.22] # Gyr
@@ -75,7 +77,7 @@ def main():
     catalog.meta["Model"] = model_name
     catalog.meta["Compared star"] = star
     catalog.meta["Compared star shortname"] = star_shortname
-    catalog.meta["suffixes"] = ["Birky low", "Birky", "Birky high"]
+    catalog.meta["suffixes"] = [suffixes]
     catalog.meta["specific_lq"] = [10 ** -(3.03 + 0.25), 10 ** -3.03, 10 ** -(3.03 - 0.23)]
     catalog.meta["specific_t_sat"] = [3.14 - 1.46, 3.14, 3.14 + 2.22]  # Gyr
     catalog.meta["specific_gamma"] = [1.17 + 0.27, 1.17, 1.17 - 0.28]

@@ -71,7 +71,7 @@ def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_
         y_min, y_max = np.min(y_vals), np.max(y_vals)
 
         nom_mask = rows["variation_id"] == "nom"
-        nom = rows[nom_mask][0] if np.any(nom_mask) else rows[0]
+        nom = rows[nom_mask][0]
         y_nom = nom[colname]
 
         v_nom = nom["v_esc"]* catalog["v_esc"].unit
