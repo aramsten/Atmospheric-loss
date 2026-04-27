@@ -90,8 +90,8 @@ def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
     name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
 
-    ring_colors, _ = pm.spectral_type_color_coder(catalog, "SpT_PM")
-    pm.apply_ring_colors(ax, ring_colors)
+    ring_colors, spectral_colors = pm.spectral_type_color_coder(catalog, "SpT_PM")
+    pm.apply_ring_colors(ax, ring_colors, spectral_colors)
 
     pm.set_log_axis_base_ten(ax)
     pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)

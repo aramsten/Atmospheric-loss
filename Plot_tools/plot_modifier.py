@@ -76,7 +76,7 @@ def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01p
             colors.append(loss_colors["Preserved"])
     return colors, loss_colors
 
-def apply_colors(ax, color_per_row, spectral_colors):
+def apply_colors(ax, color_per_row, colors_dir):
     """Apply colors to the points in the plot and create a legend.
     
     Parameters
@@ -85,7 +85,7 @@ def apply_colors(ax, color_per_row, spectral_colors):
         The axes object to which the colors will be applied.
     color_per_row : list[str]
         A list of colors for each row in the catalog.
-    spectral_colors : dict[str, str]
+    colors_dir : dict[str, str]
         A dictionary mapping types to their corresponding colors.
     """
 
@@ -93,12 +93,12 @@ def apply_colors(ax, color_per_row, spectral_colors):
     points.set_facecolors(color_per_row)
 
     # Legend-proxy-punkter
-    for spt, col in spectral_colors.items():
+    for spt, col in colors_dir.items():
         ax.scatter([], [], color=col, s=30, label=spt)
 
     ax.legend(loc="best")
 
-def apply_ring_colors(ax, color_per_row):
+def apply_ring_colors(ax, color_per_row, colors_dir):
     """Apply colors to the edges of the points in the plot.
     
     Parameters
@@ -107,9 +107,17 @@ def apply_ring_colors(ax, color_per_row):
         The axes object to which the colors will be applied.
     color_per_row : list[str]
         A list of colors for each row in the catalog.
+    colors_dir : dict[str, str]
+        A dictionary mapping types to their corresponding colors.
     """
     points = ax.collections[0]
     points.set_edgecolors(color_per_row)
+
+        # Legend-proxy-punkter
+    for spt, col in colors_dir.items():
+        ax.scatter([], [], color=col, s=30, label=spt)
+
+    ax.legend(loc="best")
 
 def set_point_size_for_names(ax, catalog, name_column, names, color_per_row,
                              size_selected=20, size_other=5,
