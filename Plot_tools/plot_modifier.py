@@ -65,18 +65,18 @@ def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01p
     """
     colors = []
     loss_colors = {
-        "removed": "green",
-        "preserved": "red"
+        "Removed": "lightgray",
+        "Preserved": "black"
     }
 
     for loss in catalog[colname]:
         if loss > 1:  # Assuming positive values indicate removed atmosphere
-            colors.append("green")
+            colors.append(loss_colors["Removed"])
         else:
-            colors.append("red")
+            colors.append(loss_colors["Preserved"])
     return colors, loss_colors
 
-def apply_colors(ax, color_per_row, spectral_colors):
+def apply_colors(ax, color_per_row, colors_dir):
     """Apply colors to the points in the plot and create a legend.
     
     Parameters
@@ -85,7 +85,7 @@ def apply_colors(ax, color_per_row, spectral_colors):
         The axes object to which the colors will be applied.
     color_per_row : list[str]
         A list of colors for each row in the catalog.
-    spectral_colors : dict[str, str]
+    colors_dir : dict[str, str]
         A dictionary mapping types to their corresponding colors.
     """
 
@@ -93,7 +93,28 @@ def apply_colors(ax, color_per_row, spectral_colors):
     points.set_facecolors(color_per_row)
 
     # Legend-proxy-punkter
-    for spt, col in spectral_colors.items():
+    for spt, col in colors_dir.items():
+        ax.scatter([], [], color=col, s=30, label=spt)
+
+    ax.legend(loc="best")
+
+def apply_ring_colors(ax, color_per_row, colors_dir):
+    """Apply colors to the edges of the points in the plot.
+    
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes object to which the colors will be applied.
+    color_per_row : list[str]
+        A list of colors for each row in the catalog.
+    colors_dir : dict[str, str]
+        A dictionary mapping types to their corresponding colors.
+    """
+    points = ax.collections[0]
+    points.set_edgecolors(color_per_row)
+
+        # Legend-proxy-punkter
+    for spt, col in colors_dir.items():
         ax.scatter([], [], color=col, s=30, label=spt)
 
     ax.legend(loc="best")
