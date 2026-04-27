@@ -65,15 +65,15 @@ def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01p
     """
     colors = []
     loss_colors = {
-        "removed": "black",
-        "preserved": "brown"
+        "Removed": "lightgray",
+        "Preserved": "black"
     }
 
     for loss in catalog[colname]:
         if loss > 1:  # Assuming positive values indicate removed atmosphere
-            colors.append("black")
+            colors.append(loss_colors["Removed"])
         else:
-            colors.append("brown")
+            colors.append(loss_colors["Preserved"])
     return colors, loss_colors
 
 def apply_colors(ax, color_per_row, spectral_colors):
