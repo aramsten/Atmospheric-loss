@@ -65,15 +65,15 @@ def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01p
     """
     colors = []
     loss_colors = {
-        "removed": "green",
-        "preserved": "red"
+        "removed": "black",
+        "preserved": "brown"
     }
 
     for loss in catalog[colname]:
         if loss > 1:  # Assuming positive values indicate removed atmosphere
-            colors.append("green")
+            colors.append("black")
         else:
-            colors.append("red")
+            colors.append("brown")
     return colors, loss_colors
 
 def apply_colors(ax, color_per_row, spectral_colors):
@@ -97,6 +97,19 @@ def apply_colors(ax, color_per_row, spectral_colors):
         ax.scatter([], [], color=col, s=30, label=spt)
 
     ax.legend(loc="best")
+
+def apply_ring_colors(ax, color_per_row):
+    """Apply colors to the edges of the points in the plot.
+    
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes object to which the colors will be applied.
+    color_per_row : list[str]
+        A list of colors for each row in the catalog.
+    """
+    points = ax.collections[0]
+    points.set_edgecolors(color_per_row)
 
 def set_point_size_for_names(ax, catalog, name_column, names, color_per_row,
                              size_selected=20, size_other=5,
