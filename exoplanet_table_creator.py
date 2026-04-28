@@ -27,9 +27,12 @@ def total_loss_calculate_for_catalog(catalog, end_time, R_xuv, eta, protoatmosph
     else:
         raise ValueError("target must be 'new' or 'catalog'")
 
+    # Saves meta-data to for calculated parameters catalog for future referencing
     loss_table.meta["eta"] = eta
     loss_table.meta["R_xuv"] = R_xuv
     loss_table.meta["end_time"] = end_time
+    catalog.meta["Protoatmosphere mass fraction"] = protoatmosphere_mass_fraction
+
 
     for t in end_time:
         loss_table = add_loss_columns_specific_time(loss_table,catalog, t, R_xuv, eta, protoatmosphere_mass_fraction, output)

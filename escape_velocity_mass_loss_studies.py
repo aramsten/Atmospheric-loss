@@ -31,7 +31,7 @@ def plot_cosmic_shoreline_spectral_types(catalog, colname, y_label):
 
     return plot, shoreline_position_text
 
-def plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, colname, y_label, eta):
+def plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, colname, y_label, eta, names_to_print):
     x_label = r"$x = (v_\mathrm{esc}/v_\mathrm{esc\oplus})^3 (\rho / \rho_\oplus)^{0.5}$"
 
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
@@ -63,14 +63,13 @@ def plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, colname, y_lab
     mass_fractions = [2e-4, 2e-3, 1e-2, 2e-1]
     draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, mass_fractions)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b"}
-    pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
-    pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+    pm.set_point_size_for_names(ax, catalog, "pl_name", names_to_print, color_per_row, size_selected=30, size_other=4)
+    pm.append_text_label(ax, catalog, "pl_name", names_to_print, x_axis, y_axis, fontweight="bold", auto=True)
     ax.grid(False, which='minor')
 
     return plot
 
-def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
+def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label, names_to_print):
     x_label = "Escape velocity (km/s)"
 
     x_axis = catalog["v_esc"]
@@ -81,24 +80,26 @@ def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label):
     plot_creator.append_y_axis(y_axis)
     plot = plot_creator.create_2D_plot(plot_scatter=True,x_label=x_label, y_label=y_label, label=catalog["pl_name"],x_logscale=True, y_logscale=True, view_legend=False)
 
-    color_per_row, spectral_colors = pm.removed_primordal_atmosphere_color_coder(catalog, "Loss/0.01protoatm., star_age")
+    color_per_row, loss_colors = pm.removed_primordal_atmosphere_color_coder(catalog, "Loss/0.01protoatm., star_age")
+    ring_colors, spectral_colors = pm.spectral_type_color_coder(catalog, "SpT_PM")
+
+    loss_values = catalog["Loss/0.01protoatm., star_age"]
+    color_per_row = [
+        ring_color if loss <= 1 else loss_colors["Loss: >0.01 M"]
+        for loss, ring_color in zip(loss_values, ring_colors)
+    ]
 
     ax = plot.gca()
     shoreline_position_text = draw_shoreline(ax, catalog, x_axis, y_axis)
-    pm.apply_colors(ax, color_per_row, spectral_colors)
-
-    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
-    pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
-
-    ring_colors, spectral_colors = pm.spectral_type_color_coder(catalog, "SpT_PM")
+    pm.apply_colors(ax, color_per_row, loss_colors)
+    pm.set_point_size_for_names(ax, catalog, "pl_name", names_to_print, color_per_row)
     pm.apply_ring_colors(ax, ring_colors, spectral_colors)
-
     pm.set_log_axis_base_ten(ax)
-    pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+    pm.append_text_label(ax, catalog, "pl_name", names_to_print, x_axis, y_axis, fontweight="bold", auto=True)
 
     return plot, shoreline_position_text
 
-def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, colname, y_label, eta):
+def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, colname, y_label, eta, names_to_print):
     x_label = r"$x = (v_\mathrm{esc}/v_\mathrm{esc\oplus})^3 (\rho / \rho_\oplus)^{0.5}$"
 
 
@@ -116,7 +117,7 @@ def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog
     plot_creator.append_y_axis(y_axis)
     plot = plot_creator.create_2D_plot(plot_scatter=True,x_label=x_label, y_label=y_label, label=catalog["pl_name"],x_logscale=True, y_logscale=True, view_legend=False)
 
-    color_per_row, spectral_colors = pm.removed_primordal_atmosphere_color_coder(catalog, "Loss/0.01protoatm., star_age")
+    color_per_row, spectral_colors = pm.removed_primordal_atmosphere_color_coder(catalog, "Loss/0.01protoatm., star_age", preserved_color="green")
 
     ax = plot.gca()
     pm.apply_colors(ax, color_per_row, spectral_colors)
@@ -131,9 +132,8 @@ def plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog
     mass_fractions = [2e-4, 2e-3, 1e-2, 2e-1]
     draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, mass_fractions)
 
-    name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b"}
-    pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
-    pm.append_text_label(ax, catalog, "pl_name", name_list, x_axis, y_axis)
+    pm.set_point_size_for_names(ax, catalog, "pl_name", names_to_print, color_per_row, size_selected=30, size_other=4)
+    pm.append_text_label(ax, catalog, "pl_name", names_to_print, x_axis, y_axis, fontweight="bold", auto=True)
     ax.grid(False, which='minor')
 
     return plot
@@ -292,34 +292,43 @@ def star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction,
         save_plot(cosmic_shoreline_plot, initials, f"cosmic_shoreline-spectral_types-{shoreline_position_text}-at-t=star_age-rxuv_factor={R_xuv}-eta={eta}")
 
 def main():
-    #table_name = "260410_08.58_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.2.csv"
-    table_name = "260424_00.26_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
+    table_name = "260428_13.58_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
     catalog = ascii.read(f"Tables/{table_name}")
-    initials = "ST"
+    initials = "AR"
 
-    R_xuv = 1.0  # dimensionless ratio >= 1
-    eta = 0.1  # dimensionless heating efficiency
-    protoatmosphere_mass_fraction = 0.01
+    names_to_print = {"Mercury",
+                      "Venus",
+                      "Earth",
+                      "Mars",
+                      "TOI-561 b",
+                      "TRAPPIST-1 b",
+                      "TRAPPIST-1 c",
+                      "TOI-1685 b"}
+
+    R_xuv = catalog.meta["R_xuv"] # dimensionless ratio >= 1
+    eta = catalog.meta["eta"] # dimensionless heating efficiency
+    protoatmosphere_mass_fraction = catalog.meta["Protoatmosphere mass fraction"]
     output = "fraction" # "mass" or "fraction"
     loss_plot = True
     normalize_loss = False
     shoreline_plot = True
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
+    end_time = catalog.meta["end_time"]
 
   #  for t in end_time:
   #      specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
     
 #    star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
 
-    plot, shoreline_position_text = plot_cosmic_shoreline_lost_primordial(catalog, "insol_star_age", "Insolation relative to Earth")
+    plot, shoreline_position_text = plot_cosmic_shoreline_lost_primordial(catalog, "insol_star_age", "Insolation relative to Earth", names_to_print)
     save_plot(plot, initials, f"cosmic_shoreline-lost_primordial-{shoreline_position_text}-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")
 
-   # plot = plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, "insol_star_age","Insolation relative to Earth", eta)
-   # save_plot(plot, initials,f"cosmic_shoreline-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")
+    plot = plot_cosmic_shoreline_over_x_with_mass_loss_fraction(catalog, "insol_star_age","Insolation relative to Earth", eta, names_to_print)
+    save_plot(plot, initials,f"cosmic_shoreline-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")
 
-   # plot = plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, "insol_star_age","Insolation relative to Earth", eta)
-   # save_plot(plot, initials, f"cosmic_shoreline-at-stars_age_lost_primordial-rxuv_factor={R_xuv}-eta={eta}")
+    plot = plot_cosmic_shoreline_over_x_with_mass_loss_fraction_lost_primordial(catalog, "insol_star_age","Insolation relative to Earth", eta, names_to_print)
+    save_plot(plot, initials, f"cosmic_shoreline-at-stars_age_lost_primordial-rxuv_factor={R_xuv}-eta={eta}")
 
 
 if __name__ == "__main__":

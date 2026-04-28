@@ -5,7 +5,7 @@ from Data_management import column_creator as cc
 from Data_management import data_modifier as dm
 from astropy.table import Table, vstack
 from astropy import units as u
-from Data_management.planet_creator import make_earth_row, add_planets_from_star_system
+from Data_management.planet_creator import add_planets_from_star_system
 from astropy.constants import R_sun, L_sun, M_sun, M_earth, R_earth
 
 def download_NASA_exoplanet_catalog(query):
@@ -13,7 +13,7 @@ def download_NASA_exoplanet_catalog(query):
   result = exocat.search(query)
   catalog = result.to_table()
   catalog["st_lum"] = 10**catalog["st_lum"]
-  catalog["st_lum"].format = ".3f"
+  catalog["st_lum"].format = ".5f"
   return catalog
 
 
@@ -26,8 +26,6 @@ def apply_units(catalog):
 
     # Star
     catalog["st_teff"] = fm.fix_unit(catalog["st_teff"], u.K)
-    catalog["st_rad"] = fm.fix_unit(catalog["st_rad"], u.R_sun)
-    catalog["st_mass"] = fm.fix_unit(catalog["st_mass"], u.M_sun)
     catalog["st_lum"] = fm.fix_unit(catalog["st_lum"], u.dimensionless_unscaled)
     catalog["st_age"] = fm.fix_unit(catalog["st_age"], u.Gyr)
     return catalog
@@ -40,14 +38,11 @@ def main():
             SELECT
               pl_name,
               hostname,
-              tic_id,
               pl_orbsmax,
               pl_rade,
               pl_masse,
               st_spectype,
               st_teff,
-              st_rad,
-              st_mass,
               st_lum,
               st_age
             FROM
@@ -57,13 +52,15 @@ def main():
               sy_snum = 1
             '''
 
-    columns_to_clean = ['tic_id',
-                        'pl_orbsmax',
+    columns_to_clean = ['pl_orbsmax',
                         'pl_rade',
                         'pl_masse',
-                        'st_teff']
+                        'st_teff',
+                        'st_lum',
+                        'st_age'
+                        ]
 
-    spectral_types_to_remove = "OBA"
+    spectral_types_to_remove = "OBAT"
 
     catalog = download_NASA_exoplanet_catalog(selected_data)
     catalog = fm.filter_catalog(catalog, columns_to_clean) # Use catalog.colnames as second input if you want to clean everything, otherwise, define columns_to_clean
@@ -75,7 +72,7 @@ def main():
     catalog = cc.assign_saturation_for_FGKM(catalog, "SpT_PM")
     catalog = cc.assign_gamma_for_FGKM(catalog, "SpT_PM")
 
-    catalog.sort(['tic_id'])
+    catalog.sort(['pl_name'])
 
     planets = ["Earth","Mercury","Venus","Mars"]
     """
