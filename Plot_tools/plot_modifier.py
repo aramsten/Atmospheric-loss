@@ -1,6 +1,7 @@
 from matplotlib.table import Table
 import numpy as np
 from matplotlib.ticker import ScalarFormatter, LogLocator
+from adjustText import adjust_text
 
 def set_log_axis_base_ten(ax, axis_to_modify="x"):
     if axis_to_modify == "x":
@@ -46,7 +47,12 @@ def spectral_type_color_coder(catalog: Table, colname="SpT_PM") -> list[str] | d
 
     return colors, spectral_colors
 
-def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01protoatm., star_age") -> list[str] | dict[str, str]:
+def removed_primordal_atmosphere_color_coder(
+        catalog: Table,
+        colname="Loss/0.01protoatm., star_age",
+        removed_color = "lightgrey",
+        preserved_color = "black") \
+        -> list[str] | dict[str, str]:
     """Assign colors to planets based on whether they have lost their primordial atmosphere or not.
     
     Parameters
@@ -65,15 +71,15 @@ def removed_primordal_atmosphere_color_coder(catalog: Table, colname="Loss/0.01p
     """
     colors = []
     loss_colors = {
-        "Removed": "lightgray",
-        "Preserved": "black"
+        "Loss: >0.01 M": removed_color,
+        "Loss: <0.01 M": preserved_color
     }
 
     for loss in catalog[colname]:
         if loss > 1:  # Assuming positive values indicate removed atmosphere
-            colors.append(loss_colors["Removed"])
+            colors.append(loss_colors["Loss: >0.01 M"])
         else:
-            colors.append(loss_colors["Preserved"])
+            colors.append(loss_colors["Loss: <0.01 M"])
     return colors, loss_colors
 
 def apply_colors(ax, color_per_row, colors_dir):
@@ -121,7 +127,7 @@ def apply_ring_colors(ax, color_per_row, colors_dir):
 
 def set_point_size_for_names(ax, catalog, name_column, names, color_per_row,
                              size_selected=20, size_other=5,
-                             alpha_selected=0.9, alpha_other=0.7,
+                             alpha_selected=1, alpha_other=0.6,
                              edge_color_selected="black",
                              edge_width_selected=0.4):
     points = ax.collections[0]
@@ -150,8 +156,14 @@ def set_point_size_for_names(ax, catalog, name_column, names, color_per_row,
 
 def append_text_label(ax, catalog, colname, names, x_axis, y_axis,
                       x_offset=1.05, y_offset=1.02,
-                      color="black", fontsize=8):
+                      color="black", fontweight="normal", fontsize=8, auto=False):
+    texts = []
+
+    if auto:
+        x_offset = 1
+        y_offset = 1
     for i, name in enumerate(catalog[colname]):
+
         if name not in names:
             continue
         x = x_axis[i]
@@ -163,4 +175,40 @@ def append_text_label(ax, catalog, colname, names, x_axis, y_axis,
         if hasattr(y, "to_value"):
             y = y.to_value()
 
-        ax.text(x*x_offset,y*y_offset,name,fontsize=fontsize,color=color,ha="left",va="bottom")
+        texts.append(ax.text(
+                x*x_offset,
+                y*y_offset,
+                name,
+                va="center",
+                ha="left",
+                fontsize=fontsize,
+                color=color,
+                fontweight=fontweight,
+                ))
+
+    if auto:
+        adjust_text(
+            texts,
+            x=x_axis,
+            y=y_axis,
+            ax=ax,
+
+            # These five parameters should change the position of the text/length of arrow
+            # It seems to be working rather poorly for our log-plots
+            # Change with caution
+            force_points=(0.5, 1.0),
+            force_text=(0.5, 1.0),
+            expand_points=(0.5, 1.0),
+            axpand_text=(0.5, 1.0),
+            min_arrow_len=15,
+
+            arrowprops=dict(
+                arrowstyle='->',
+                color='grey',
+                lw=0.8,
+                # Shrink should change the starting point of the arrow
+                # Works rather poorly for our log-plot
+                shrinkA=8,
+                shrinkB=1
+            )
+        )
