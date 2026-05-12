@@ -59,6 +59,7 @@ class Plot2D_creator():
     def create_2D_plot(self, title = "",label="",x_label="",y_label="",x_logscale = False, y_logscale = False, plot_scatter = False, view_legend = False, view_errorbar = False):
         """Creates a plot with an x-axis, y-axis and a colorplot that is calculated from a chosen function"""
         plt.clf()
+        plt.rc('font', size=18)
         if plot_scatter:
             plt.scatter(self.x_axis,
                 self.y_axis,
@@ -202,6 +203,8 @@ class Six_3Dplot_creator(Plot3D_creator):
                 norm=self.norm,
                 alpha=0.6
             )
+            plt.rc('font', size=14)
+
             ax.set_title(title)
             ax.set_xlabel("Distance to star (AU)")
             ax.set_ylabel(r"$R_{\mathrm{XUV}} / R_p$")

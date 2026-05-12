@@ -1,7 +1,6 @@
 from matplotlib.table import Table
 import numpy as np
 from matplotlib.ticker import ScalarFormatter, LogLocator
-from adjustText import adjust_text
 
 def set_log_axis_base_ten(ax, axis_to_modify="x"):
     if axis_to_modify == "x":
