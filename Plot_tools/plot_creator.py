@@ -59,7 +59,6 @@ class Plot2D_creator():
     def create_2D_plot(self, title = "",label="",x_label="",y_label="",x_logscale = False, y_logscale = False, plot_scatter = False, view_legend = False, view_errorbar = False):
         """Creates a plot with an x-axis, y-axis and a colorplot that is calculated from a chosen function"""
         plt.clf()
-        plt.rc('font', size=18)
         if plot_scatter:
             plt.scatter(self.x_axis,
                 self.y_axis,
@@ -68,7 +67,7 @@ class Plot2D_creator():
                 alpha=1)
         for i in range(len(self.y_axis)):
             if not plot_scatter:
-                plt.plot(self.x_axis,self.y_axis[i],label=label[i])
+                plt.plot(self.x_axis,self.y_axis[i],label=label[i],linewidth=3)
                 if self.error is not None and view_errorbar:
                     plt.errorbar(self.x_axis,self.y_axis[i],yerr=self.error[i], fmt='o', markersize=0, capsize=3, alpha=0.5)
 

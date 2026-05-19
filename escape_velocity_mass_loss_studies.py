@@ -295,7 +295,7 @@ def main():
     table_name = "260428_13.58_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
     catalog = ascii.read(f"Tables/{table_name}")
-    initials = "AR"
+    initials = "ST"
 
     names_to_print = {"Mercury",
                       "Venus",
@@ -319,7 +319,7 @@ def main():
   #  for t in end_time:
   #      specific_time_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot, t)
     
-#    star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
+    star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction, output, loss_plot, normalize_loss, shoreline_plot)
 
     plot, shoreline_position_text = plot_cosmic_shoreline_lost_primordial(catalog, "insol_star_age", "Insolation relative to Earth", names_to_print)
     save_plot(plot, initials, f"cosmic_shoreline-lost_primordial-{shoreline_position_text}-at-stars_age-rxuv_factor={R_xuv}-eta={eta}")

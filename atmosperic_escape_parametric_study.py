@@ -16,7 +16,7 @@ def parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distanc
         y_axis = y_axis/m_p[i]/0.001
         plot_creator.append_y_axis(y_axis)
     plot_creator.normalize_AU(normalize_x_axis=True)
-    plot = plot_creator.create_2D_plot(x_label="Distance from star (AU)",y_label=r"$M_{loss}$ / 1%$M_{\oplus}$",label=planets,y_logscale=True,view_legend=True)
+    plot = plot_creator.create_2D_plot(x_label="Distance from star (AU)",y_label=r"$M_{loss}$ / 1%$M_{\oplus}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
 
     save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_distance_eta={eta}_rxuv_factor={r_xuv_factor}")
 
