@@ -10,29 +10,8 @@ def luminosity_calculator(t_mesh, r_mesh):
     Output: A mesh with luminosity normalized to our sun"""
     return r_mesh**2 * t_mesh**4
 
-def total_atmospheric_escape_calculator(distance,r_xuv,eta,m_p,r_p,l_bol,dt,t_end,t_sat):
-    t_end = t_end.to(u.s) #Convert from years to seconds
-    dt = dt.to(u.s) #Convert from years to seconds
-    t_sat = t_sat.to(u.s) #Convert from years to seconds
-    m_esc_total = total_atmospheric_escape_integrator(distance,r_xuv,eta,m_p,r_p,l_bol,dt,t_end,t_sat)
-    m_esc_total_error = abs(m_esc_total - total_atmospheric_escape_integrator(distance,r_xuv,eta,m_p,r_p,l_bol,dt*2,t_end,t_sat))
-    m_esc_total = m_esc_total
-    return m_esc_total, m_esc_total_error
-
-def total_atmospheric_escape_integrator(distances,r_xuv,eta,m_p,r_p,l_bol,dt,t_end,t_sat):
-    t = 0
-    m_esc_total = 0
-    while t < t_end:
-        l_xuv = calculate_l_xuv(l_bol,t,t_sat)
-        f_xuv = calculate_stellar_flux(l_xuv, distances)
-        m_esc_dt = eta*pi*r_xuv**2*r_p*f_xuv/(G*m_p)
-        m_esc_total += m_esc_dt * dt
-        t += dt
-    m_esc_total = m_esc_total
-    return m_esc_total
-
 def atmospheric_escaperates_calculator(distances,r_xuv,eta,m_p,r_p,l_bol):
-    """Calculates the momentarly atmospheric escape rate for a certain platet at a specified distance
+    """Calculates the atmospheric escape rate for a certain platet at a specified distance
     from a star.
      r_xuv_factors: A mesh with the dimentionless factors of the planets radii that the xuv-radiation reaches. Ex 1.5 means that the xuv-radiation reaches 1.5 times the planets radii."""
     l_xuv = calculate_l_xuv(l_bol)
@@ -79,20 +58,3 @@ def calculate_escape_velocity(m_p, r_p):
     """Calculates the escape velocity"""
     v_esc = np.sqrt(2*G*m_p/r_p)
     return v_esc
-
-def integrate_l_xuv(catalog, lbol_col, lq_col, t_sat_col, t_end, steps):
-    Lxuv_t = 0
-    dt = t_end/steps
-
-    Lxuv_sat = catalog[lbol_col]*catalog[lq_col]*catalog[t_sat_col]
-
-    t_remain = t_end-t_sat_col
-    for stars in catalog:
-        t = catalog[stars][t_sat_col] + dt
-        while t < t_end:
-            Lxuv_t += Lxuv_sat[stars]*(t/catalog[stars][t_sat_col])**(-1.23)
-            t += dt
-
-    Lxuv_total = Lxuv_sat + Lxuv_t
-
-    return Lxuv_total

@@ -49,13 +49,6 @@ class Plot2D_creator():
         else:
             self.y_axis.append(y_axis)
 
-    def append_error(self,error):
-        """Appends an error to the object."""
-        if self.error is None:
-            self.error = [error]
-        else:
-            self.error.append(error)
-
     def create_2D_plot(self, title = "",label="",x_label="",y_label="",x_logscale = False, y_logscale = False, plot_scatter = False, view_legend = False, view_errorbar = False):
         """Creates a plot with an x-axis, y-axis and a colorplot that is calculated from a chosen function"""
         plt.clf()
