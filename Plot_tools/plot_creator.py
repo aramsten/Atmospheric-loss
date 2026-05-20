@@ -7,10 +7,11 @@ from astropy.constants import  L_sun
 from astropy import units as u
 
 class Plot2D_creator():
-    def __init__(self,x_axis):
+    def __init__(self,x_axis,fontsize = 16):
         self.x_axis = x_axis
         self.y_axis = None
         self.error = None
+        self.fontsize = fontsize
 
     def normalize_planet_radii(self,r_p, normalize_x_axis = False, normalize_y_axis = False):
         """Normalizes the axis to planet radii"""
@@ -71,8 +72,8 @@ class Plot2D_creator():
         if view_legend:
             plt.legend()
 
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
+        plt.xlabel(x_label,fontsize=self.fontsize)
+        plt.ylabel(y_label,fontsize=self.fontsize)
         plt.title(title)
         plt.grid(True, which="both", ls="--", alpha=0.8)
         plt.tight_layout()
@@ -82,8 +83,8 @@ class Plot2D_creator():
 class Plot3D_creator(Plot2D_creator):
     """A object for creating a mesh of a function. This object exist only to set up children, do not use"""
 
-    def __init__(self,x_axis,y_axis,resolution = 400):
-        super().__init__(x_axis)
+    def __init__(self,x_axis,y_axis,resolution = 400,fontsize = 16):
+        super().__init__(x_axis,fontsize)
         self.resolution = resolution
         self.y_axis = y_axis
 
@@ -155,8 +156,8 @@ class Plot3D_creator(Plot2D_creator):
         plt.xlim(np.min(self.x_axis), np.max(self.x_axis))
         plt.ylim(np.min(self.y_axis), np.max(self.y_axis))
 
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
+        plt.xlabel(x_label, fontsize=self.fontsize)
+        plt.ylabel(y_label, fontsize=self.fontsize)
         plt.title(title)
         if plt_colorbar == True:
             plt.colorbar(mesh, label=color_label)
@@ -167,8 +168,8 @@ class Plot3D_creator(Plot2D_creator):
 
 class Six_3Dplot_creator(Plot3D_creator):
 
-    def __init__(self,x_axis,y_axis,resolution = 400):
-        super().__init__(x_axis,y_axis,resolution)
+    def __init__(self,x_axis,y_axis,resolution = 400,fontsize = 16):
+        super().__init__(x_axis,y_axis,resolution,fontsize)
         self.z_meshes = []
 
     def add_z_mesh(self,z_mesh):
@@ -195,11 +196,11 @@ class Six_3Dplot_creator(Plot3D_creator):
                 norm=self.norm,
                 alpha=0.6
             )
-            plt.rc('font', size=14)
+            plt.rc('font', size=self.fontsize)
 
             ax.set_title(title)
-            ax.set_xlabel("Distance to star (AU)")
-            ax.set_ylabel(r"$R_{\mathrm{XUV}} / R_p$")
+            ax.set_xlabel("Distance to star (AU)", fontsize=self.fontsize)
+            ax.set_ylabel(r"$R_{\mathrm{XUV}} / R_p$", fontsize=self.fontsize)
             ax.set_xscale("log")
             ax.grid(True, which="both", ls="--", alpha=0.8)
 

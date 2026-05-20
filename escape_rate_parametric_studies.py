@@ -6,7 +6,7 @@ from Calculators.function_solvers import atmospheric_escaperates_calculator
 from astropy import units as u
 
 def calculate_multiple_planets(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors, resolution):
-    plot_creator = Six_3Dplot_creator(distances,r_xuv_factors, resolution)
+    plot_creator = Six_3Dplot_creator(distances,r_xuv_factors, resolution,fontsize=20)
     distances_mesh, r_xuv_factors_mesh = plot_creator.create_mesh()
 
     for i in range(len(planets)):
@@ -15,49 +15,44 @@ def calculate_multiple_planets(planets, m_p, r_p, eta, l_bol, distances, r_xuv_f
     plot_creator.normalize_AU(normalize_x_axis=True)
     plot_creator.add_norm()
     plot =plot_creator.six_window_plot(planets)
-    plot.rc('font', size=18)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_r_xuv_distance_eta={eta}")
 
 def parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distances):
-    plot_creator = Plot2D_creator(distances)
+    plot_creator = Plot2D_creator(distances,fontsize=25)
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
         y_axis = atmospheric_escaperates_calculator(distances,r_xuv,eta,m_p[i],r_p[i],l_bol)
         plot_creator.append_y_axis(y_axis)
     plot_creator.normalize_AU(normalize_x_axis=True)
     plot = plot_creator.create_2D_plot(x_label="Distance from star (AU)",y_label="Atmospheric escape rate (kg/s)",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
-    plot.rc('font', size=18)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_standard_planets_distance_eta={eta}_rxuv_factor={r_xuv_factor}")
 
 def parametric_r_xuv_factor(planets,m_p,r_p,r_xuv_factors,eta,l_bol,distance):
-    plot_creator = Plot2D_creator(r_xuv_factors)
+    plot_creator = Plot2D_creator(r_xuv_factors,fontsize=25)
     for i in range(len(planets)):
         r_xuv = r_xuv_factors * r_p[i]
         y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],l_bol)
         plot_creator.append_y_axis(y_axis)
     plot = plot_creator.create_2D_plot(x_label=r"$R_{\mathrm{XUV}} / R_p$",y_label="Atmospheric escape rate (kg/s)",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
-    plot.rc('font', size=18)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_r_xuv_factor_standard_planets_eta={eta}_distance={distance}m")
 
 def parametric_heating_efficiency(planets,m_p,r_p,r_xuv_factor,l_bol,distance,etas):
-    plot_creator = Plot2D_creator(etas)
+    plot_creator = Plot2D_creator(etas,fontsize=25)
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
         y_axis = atmospheric_escaperates_calculator(distance,r_xuv,etas,m_p[i],r_p[i],l_bol)
         plot_creator.append_y_axis(y_axis)
     plot = plot_creator.create_2D_plot(x_label=r"Heating efficiency $\eta$",y_label="Atmospheric escape rate (kg/s)",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
-    plot.rc('font', size=18)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_heating_efficiency_standard_planets_distance={distance}m_r_xuv_factor={r_xuv_factor}")
 
 def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance):
-    plot_creator = Plot2D_creator(l_bols)
+    plot_creator = Plot2D_creator(l_bols,fontsize=25)
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
         y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],l_bols)
         plot_creator.append_y_axis(y_axis)
     plot_creator.normalize_L_sun(normalize_x_axis=True)
     plot = plot_creator.create_2D_plot(x_label=r"Bolometric Luminosity $L_{\mathrm{bol}}$ / $L_{\odot}$",y_label="Atmospheric escape rate (kg/s)",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
-    plot.rc('font', size=18)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_l_bol_standard_planets_eta={eta}_distance={distance}m_r_xuv_factor={r_xuv_factor}")
 
 def main():
