@@ -156,7 +156,7 @@ def set_point_size_for_names(ax, catalog, name_column, names, color_per_row,
 
 def append_text_label(ax, catalog, colname, names, x_axis, y_axis,
                       x_offset=1.05, y_offset=1.02,
-                      color="black", fontweight="normal", fontsize=8, auto=True):
+                      color="black", fontweight="bold", fontsize=8, auto=True):
     texts = []
 
     if auto:

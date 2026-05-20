@@ -2,6 +2,7 @@ from Plot_tools.plot_creator import Plot2D_creator, save_plot
 from Calculators import function_solvers as fs
 from astropy.constants import L_sun, G
 from astropy import units as u
+from astropy.table import Table
 import Plot_tools.plot_modifier as pm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,6 +22,16 @@ def plot_cosmic_shoreline_spectral_types(catalog, colname, y_label,names_to_prin
     color_per_row, spectral_colors = pm.spectral_type_color_coder(catalog, "SpT_PM")
 
     ax = plot.gca()
+
+    x_vals_raw = x_axis.value if hasattr(x_axis, "value") else x_axis
+    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
+    x_min, x_max = np.nanmin(x_vals_raw), np.nanmax(x_vals_raw)
+    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
+
+    # Use x_min / x_max / y_min / y_max if you donät want to set it manually
+    ax.set_xlim(x_min*0.95, x_max*1.05)
+    ax.set_ylim(y_min*0.95, y_max*1.05)
+
     shoreline_position_text = draw_shoreline(ax, catalog, x_axis, y_axis)
     pm.apply_colors(ax, color_per_row, spectral_colors)
 
@@ -89,6 +100,17 @@ def plot_cosmic_shoreline_lost_primordial(catalog, colname, y_label, names_to_pr
     ]
 
     ax = plot.gca()
+
+    x_vals_raw = x_axis.value if hasattr(x_axis, "value") else x_axis
+    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
+    x_min, x_max = np.nanmin(x_vals_raw), np.nanmax(x_vals_raw)
+    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
+
+    # Use x_min / x_max / y_min / y_max if you donät want to set it manually
+    # Typically, x_max = 1e2 and y_min = 1e-1 is a solid choice for this plot
+    ax.set_xlim(x_min * 0.95, x_max * 1.05)
+    ax.set_ylim(y_min * 0.95, y_max * 1.05)
+
     shoreline_position_text = draw_shoreline(ax, catalog, x_axis, y_axis)
     pm.apply_colors(ax, color_per_row, loss_colors)
     pm.set_point_size_for_names(ax, catalog, "pl_name", names_to_print, color_per_row)
@@ -181,7 +203,10 @@ def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, fractions):
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1)
                 )
 
-def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", factor_over_reference=1.1, vmin=1, vmax=100):
+
+def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", factor_over_reference=1.1):
+    vmin, vmax = ax.get_xlim()
+
     reference_idx = np.where(catalog[planetname_column] == reference)[0][0]
     v_reference = x_axis[reference_idx]
     I_reference = y_axis[reference_idx]
@@ -238,13 +263,20 @@ def plot_loss(catalog: Table, colname: str, y_label: str, normalize: bool, names
     color_per_row, spectral_colors = pm.spectral_type_color_coder(catalog, "SpT_PM")
 
     ax = plot.gca()
-    pm.apply_colors(ax, color_per_row, spectral_colors)
 
-    xmin, xmax = ax.get_xlim()
-    x_vals = np.logspace(np.log10(xmin), np.log10(xmax), 200)
+    x_vals_raw = x_axis.value if hasattr(x_axis, "value") else x_axis
+    y_vals_raw = y_axis.value if hasattr(y_axis, "value") else y_axis
+    x_min, x_max = np.nanmin(x_vals_raw), np.nanmax(x_vals_raw)
+    y_min, y_max = np.nanmin(y_vals_raw), np.nanmax(y_vals_raw)
+
+    # Use x_min / x_max / y_min / y_max if you donät want to set it manually
+    ax.set_xlim(x_min*0.95, x_max*1.05)
+    ax.set_ylim(y_min*0.95, y_max*1.05)
+
+    x_vals = np.logspace(np.log10(x_min), np.log10(x_max), 200)
     y_line = [10**0]*len(x_vals)
     ax.plot(x_vals, y_line, linestyle="--",color="black", alpha=0.8, zorder=1)
-    x_pos = int(len(x_vals)*0.01)
+    x_pos = x_min* 1.1
     y_pos = 10**0
     ax.text(x_pos, y_pos, rf"$10^{{{0}}}$",
             fontsize=8,
@@ -254,6 +286,7 @@ def plot_loss(catalog: Table, colname: str, y_label: str, normalize: bool, names
             bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1)
             )
 
+    pm.apply_colors(ax, color_per_row, spectral_colors)
     pm.set_point_size_for_names(ax, catalog, "pl_name", names_to_print, color_per_row)
     pm.set_log_axis_base_ten(ax)
 
@@ -327,7 +360,7 @@ def main():
     table_name = "260520_21.27_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
     catalog = ascii.read(f"Tables/{table_name}")
-    initials = "ST"
+    initials = "AR"
 
     names_to_print = {"Mercury",
                     "Venus",
@@ -340,6 +373,7 @@ def main():
                     "Neptune",
                     "TRAPPIST-1 b",
                     "TRAPPIST-1 c",
+                    "TRAPPIST-1 d",
                     "TOI-1685 b"}
 
     R_xuv = catalog.meta["R_xuv"] # dimensionless ratio >= 1
