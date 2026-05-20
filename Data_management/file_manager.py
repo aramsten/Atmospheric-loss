@@ -1,6 +1,7 @@
 import os
 import datetime
 import numpy as np
+from astropy import units as u
 
 def clean_column(table, colname):
     col = table[colname]
@@ -21,6 +22,15 @@ def filter_catalog(cat, columns_to_clean):
     clean_cat = cat[mask]
     return clean_cat
 
+def remove_spt(catalog, colname, spt_to_remove):
+    """ Removes planets with spectral type stars in string spt_to_remove, eg. "OAB" """
+    spt_col = catalog[colname].astype(str)
+    mask = np.ones(len(spt_col), dtype=bool)
+
+    for spt in spt_to_remove:
+        mask &= ~np.char.startswith(spt_col, spt)
+    return catalog[mask]
+
 def fix_unit(col, unit):
     # If it is a Quantity
     if hasattr(col, "unit") and col.unit is not None:
@@ -33,6 +43,19 @@ def fix_unit(col, unit):
             return col.value * unit
     # No unit assigned
     return col * unit
+
+def apply_units(catalog):
+    """ Set the correct units for the selected columns"""
+    # Planet
+    catalog["pl_orbsmax"] = fix_unit(catalog["pl_orbsmax"], u.AU)
+    catalog["pl_rade"] = fix_unit(catalog["pl_rade"], u.R_earth)
+    catalog["pl_masse"] = fix_unit(catalog["pl_masse"], u.M_earth)
+
+    # Star
+    catalog["st_teff"] = fix_unit(catalog["st_teff"], u.K)
+    catalog["st_lum"] = fix_unit(catalog["st_lum"], u.dimensionless_unscaled)
+    catalog["st_age"] = fix_unit(catalog["st_age"], u.Gyr)
+    return catalog
 
 def save_catalog(catalog, initials, description="Catalog_NASA_exoplanet",folder="Tables", filetype="csv"):
     today = datetime.datetime.today()

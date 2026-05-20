@@ -198,9 +198,28 @@ def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", ref
     else:
         shoreline_position_text = f"at-{factor_over_reference}-{reference}-insolation"
 
-    return shoreline_position_text, shoreline_position_text
+    return shoreline_position_text
 
-def plot_loss(catalog, colname, y_label, normalize):
+def plot_loss(catalog: Table, colname: str, y_label: str, normalize: bool) -> plt.Figure:
+    """Creates a plot of mass loss or mass loss fraction against escape velocity for a catalog of planets, with the option to normalize the loss to Earth's loss.
+     The points are colored by spectral type and labeled with planet names.
+
+    Parameters
+    ----------
+    catalog : Table
+        A catalog containing planet data. Must include columns named "pl_name", "v_esc" and "SpT_PM".
+    colname : str
+        The name of the column containing the loss data to plot.
+    y_label : str
+        The label for the y-axis.
+    normalize : bool
+        Whether to normalize the loss data to the Earth's loss.
+
+    Returns
+    -------
+    plot : matplotlib.pyplot
+        The created plot.
+    """
     earth_idx = np.where(catalog["pl_name"] == "Earth")[0][0]
     x_axis = catalog["v_esc"]
     if normalize:
@@ -220,6 +239,8 @@ def plot_loss(catalog, colname, y_label, normalize):
 
     ax = plot.gca()
     pm.apply_colors(ax, color_per_row, spectral_colors)
+
+    ax.plot([0, max(x_axis)], [10**0, 10**0], "--", color="black", linewidth=1)
 
     name_list = {"Mercury", "Venus", "Earth", "Mars", "TOI-561 b", "TRAPPIST-1 e"}
     pm.set_point_size_for_names(ax, catalog, "pl_name", name_list, color_per_row)
@@ -292,7 +313,7 @@ def star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction,
         save_plot(cosmic_shoreline_plot, initials, f"cosmic_shoreline-spectral_types-{shoreline_position_text}-at-t=star_age-rxuv_factor={R_xuv}-eta={eta}")
 
 def main():
-    table_name = "260428_13.58_AR_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
+    table_name = "260520_11.10_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
     catalog = ascii.read(f"Tables/{table_name}")
     initials = "ST"

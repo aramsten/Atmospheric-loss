@@ -2,10 +2,8 @@ import pyvo
 import numpy as np
 from Data_management import file_manager as fm
 from Data_management import column_creator as cc
-from Data_management import data_modifier as dm
 from astropy.table import Table, vstack
-from astropy import units as u
-from Data_management.planet_creator import add_planets_from_star_system
+from Data_management.planet_creator import add_planets_from_our_star_system
 from astropy.constants import R_sun, L_sun, M_sun, M_earth, R_earth
 
 def download_NASA_exoplanet_catalog(query):
@@ -15,20 +13,6 @@ def download_NASA_exoplanet_catalog(query):
   catalog["st_lum"] = 10**catalog["st_lum"]
   catalog["st_lum"].format = ".5f"
   return catalog
-
-
-def apply_units(catalog):
-    """ Set the correct units for the selected columns"""
-    # Planet
-    catalog["pl_orbsmax"] = fm.fix_unit(catalog["pl_orbsmax"], u.AU)
-    catalog["pl_rade"] = fm.fix_unit(catalog["pl_rade"], u.R_earth)
-    catalog["pl_masse"] = fm.fix_unit(catalog["pl_masse"], u.M_earth)
-
-    # Star
-    catalog["st_teff"] = fm.fix_unit(catalog["st_teff"], u.K)
-    catalog["st_lum"] = fm.fix_unit(catalog["st_lum"], u.dimensionless_unscaled)
-    catalog["st_age"] = fm.fix_unit(catalog["st_age"], u.Gyr)
-    return catalog
 
 def main():
     initials = "AR"
@@ -64,31 +48,15 @@ def main():
 
     catalog = download_NASA_exoplanet_catalog(selected_data)
     catalog = fm.filter_catalog(catalog, columns_to_clean) # Use catalog.colnames as second input if you want to clean everything, otherwise, define columns_to_clean
-    catalog = apply_units(catalog)
+    catalog = fm.apply_units(catalog)
     catalog = cc.spectral_type_from_teff(catalog, "st_teff")
-    catalog = dm.remove_spt(catalog, "SpT_PM", spectral_types_to_remove)
+    catalog = fm.remove_spt(catalog, "SpT_PM", spectral_types_to_remove)
 
     catalog = cc.assign_Lq_for_FGKM(catalog, "SpT_PM")
     catalog = cc.assign_saturation_for_FGKM(catalog, "SpT_PM")
     catalog = cc.assign_gamma_for_FGKM(catalog, "SpT_PM")
 
     catalog.sort(['pl_name'])
-
-    planets = ["Earth","Mercury","Venus","Mars"]
-    """
-    Data sources:
-    https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
-    https://www.esa.int/Science_Exploration/Space_Science/Venus_Express/Venus_compared_to_Earth
-    https://www.esa.int/Science_Exploration/Space_Science/Mars_Express/Facts_about_Mars
-    """
-    planet_masses = [1.0, 0.055, 0.814, 0.11]
-    planet_radii = [1.0, 0.383, 0.949, 0.533]
-    planet_distance = [1.0, 0.4, 0.72, 1.52]
-    catalog = add_planets_from_star_system(catalog, planets, planet_masses, planet_radii, planet_distance)
-
-    catalog = cc.add_escape_velocity(catalog, "pl_masse", "pl_rade")
-
-    catalog = apply_units(catalog)
 
     return catalog
 

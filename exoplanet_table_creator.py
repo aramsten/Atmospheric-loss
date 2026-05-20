@@ -1,7 +1,8 @@
 from Calculators.function_solvers import calculate_total_mass_loss
 from astropy.constants import R_sun, L_sun, sigma_sb, M_earth, R_earth
 from Data_management import nasa_exoplanet_download
-from Data_management.file_manager import save_catalog
+from Data_management.file_manager import apply_units, save_catalog
+from Data_management.planet_creator import add_planets_from_our_star_system
 import Plot_tools.plot_modifier as pm
 import numpy as np
 from astropy.table import Table
@@ -174,6 +175,10 @@ def add_loss_colums_star_age(loss_table: Table, catalog: Table, R_xuv: float, et
 
 def main():
     catalog = nasa_exoplanet_download.main()
+    catalog = add_planets_from_our_star_system(catalog)
+    catalog = apply_units(catalog)
+
+
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
 
     output = "fraction" # "mass" or "fraction"
@@ -186,7 +191,7 @@ def main():
 
     target = "catalog" # "catalog" or "new"
     catalog = total_loss_calculate_for_catalog(catalog, end_time, R_xuv, eta, protoatmosphere_mass_fraction, target, output)
-    save_catalog(catalog, "AR", description, filetype="ecsv")
+    save_catalog(catalog, "ST", description, filetype="ecsv")
     
 if __name__ == "__main__":
     main()
