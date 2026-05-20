@@ -333,7 +333,7 @@ def main():
                     "Venus",
                     "Earth",
                     "Mars",
-                    "The Moon", 
+                    "Moon", 
                     "Jupiter",
                     "Saturn",
                     "Uranus",

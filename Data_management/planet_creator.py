@@ -80,7 +80,7 @@ def add_planets_from_our_star_system(catalog):
         The updated catalog with the added planets.
     """
 
-    planets = ["Earth","Mercury","Venus","Mars","The Moon", "Jupiter","Saturn","Uranus","Neptune"]
+    planets = ["Earth","Mercury","Venus","Mars","Moon", "Jupiter","Saturn","Uranus","Neptune"]
     """
     Data sources:
     https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
