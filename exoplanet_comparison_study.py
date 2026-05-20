@@ -5,7 +5,7 @@ import numpy as np
 from astropy.io import ascii
 from astropy import units as u
 from Calculators import function_solvers as fs
-
+from escape_velocity_mass_loss_studies import draw_shoreline
 
 def atmosphere_color(name):
     """
@@ -34,6 +34,95 @@ def atmosphere_color(name):
     if name == "TRAPPIST-1 d": return "red"
 
     return "gray"
+
+def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model_name, star, star_shortname):
+    base = catalog[catalog["variation_id"] == "baseline"]
+    model = catalog[catalog["model_id"] == model_name]
+
+    x_base = base["v_esc"]
+    y_base = base[colname]
+
+    fig, ax = plt.subplots()
+
+    # Baseline
+    for i, name in enumerate(base["pl_name"]):
+        color = atmosphere_color(name)
+        ax.scatter(x_base.value[i], y_base[i],
+                   color=color, marker="o", s=40, zorder=3)
+
+        ax.text(x_base.value[i] * 1.05,
+                y_base[i] * 0.8,
+                short_label(name, star, star_shortname),
+                fontsize=7,
+                color="black",
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0))
+
+    # Compared model
+    for name in base["pl_name"]:
+        rows = model[model["pl_name"] == name]
+        if len(rows) == 0:
+            continue
+
+        y_vals = np.array([r[colname] for r in rows])
+        y_min, y_max = np.min(y_vals), np.max(y_vals)
+
+        nom_mask = rows["variation_id"] == "nom"
+        nom = rows[nom_mask][0]
+        y_nom = nom[colname]
+
+        x_nom = nom["v_esc"]
+
+        color = atmosphere_color(name)
+
+        ax.errorbar(
+            x_nom, y_nom,
+            yerr=[[y_nom - y_min], [y_max - y_nom]],
+            fmt='s',
+            color=color,
+            markersize=6,
+            capsize=3,
+            zorder=4
+        )
+
+        ax.text(x_nom * 1.05,
+                y_nom * 1.05,
+                short_label(name, star, star_shortname),
+                fontsize=7,
+                color="black",
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0.5))
+
+    # Axis settings
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+
+    ax.grid(True, which="both", linestyle="--", linewidth=0.6, alpha=0.7)
+
+    plot_margin = 0.07
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
+    ax.set_xlim(x_min * (1-plot_margin) , x_max * (1+plot_margin))
+    ax.set_ylim(y_min * (1-plot_margin), y_max * (1+plot_margin))
+
+    # SHoreline
+    shoreline_position_text = draw_shoreline(ax, catalog, x_base, y_base)
+    x_pos = 4.2
+    y_pos = 0.23
+    ax.text(x_pos, y_pos,
+            r"$I_\mathrm{XUV} \propto v_\mathrm{esc}^4$",
+            fontsize=10,
+            va="center",
+            ha="center",
+            rotation=24,
+            zorder=2,
+            bbox=dict(facecolor='white', edgecolor='none', alpha=0.9, pad=1.2)
+            )
+
+    # Legends
+    add_legends(ax, model_name)
+
+    return fig, shoreline_position_text
 
 
 def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_name, star, star_shortname):
@@ -117,7 +206,8 @@ def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_
     ax.set_ylim(y_min * (1-plot_margin), y_max * (1+plot_margin))
 
     # Mass loss lines
-    mass_fractions = [2e-4, 2e-3, 1e-2, 2e-1]
+    mars_loss = (catalog[catalog['pl_name'] == 'Mars']['Loss/0.01protoatm., star_age'][0])*1e-2
+    mass_fractions = [2e-4, 2e-3, 1e-2, 2e-1, mars_loss]
     draw_mass_loss_lines_for_comparison(ax, base, eta, x_base, y_base, mass_fractions, earth_idx)
 
     # Legends
@@ -126,6 +216,8 @@ def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_
     return fig
 
 def draw_mass_loss_lines_for_comparison(ax, catalog, eta, x_axis, y_axis, fractions, earth_idx):
+    mars_loss = (catalog[catalog['pl_name'] == 'Mars']['Loss/0.01protoatm., star_age'][0])*1e-2
+
     d = catalog["pl_orbsmax"].to(u.m)
     lum = catalog["st_lum"]*L_sun
     lq = catalog["Lxuv/Lbol"]
@@ -158,7 +250,8 @@ def draw_mass_loss_lines_for_comparison(ax, catalog, eta, x_axis, y_axis, fracti
         ax.plot(x_vals, y_line, linestyle="--", color="blue", alpha=0.3, zorder=1)
         x_pos = x_vals[15] if f != 0.0002 else x_vals[80]
         y_pos = y_line[15] if f != 0.0002 else y_line[82]
-        ax.text(x_pos, y_pos, rf"$\Delta M = {f}$",
+        ax.text(x_pos, y_pos,
+                r"$\Delta M_\mathrm{Mars}$" if f == mars_loss else rf"$\Delta M = {f}$",
                 fontsize=8,
                 va="center",
                 ha="center",
@@ -217,6 +310,18 @@ def main():
         star_shortname
     )
     save_plot(plot, initials, plot_name)
+
+    plot, shoreline_position_text = plot_cosmic_shoreline_regular(
+        catalog,
+        "insol_star_age",
+        "Escape velocity (km/s)",
+        "Insolation relative to Earth",
+        eta,
+        model_name,
+        star,
+        star_shortname
+    )
+    save_plot(plot, initials, f"{shoreline_position_text}_{plot_name}")
 
 if __name__ == "__main__":
     main()
