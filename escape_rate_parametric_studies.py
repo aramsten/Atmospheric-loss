@@ -55,6 +55,32 @@ def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance):
     plot = plot_creator.create_2D_plot(x_label=r"Bolometric Luminosity $L_{\mathrm{bol}}$ / $L_{\odot}$",y_label="Atmospheric escape rate (kg/s)",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_l_bol_standard_planets_eta={eta}_distance={distance}m_r_xuv_factor={r_xuv_factor}")
 
+def merged_1variable_studies(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distance,normalization_factor):
+        plt.clf()
+        colors = plt.cm.viridis(np.linspace(0, 1, len(planets)))
+        for i in range(len(planets)):
+            r_xuv = normalization_factor * r_p[i]
+            y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],l_bol)
+            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle="-")
+            r_xuv = r_xuv_factor * r_p[i]
+            y_axis = atmospheric_escaperates_calculator(distance,r_xuv,normalization_factor,m_p[i],r_p[i],l_bol)
+            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle="--")
+
+            y_axis = atmospheric_escaperates_calculator(normalization_factor,r_xuv,eta,m_p[i],r_p[i],l_bol)
+            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle="-.")
+
+            y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],normalization_factor)
+            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle=":")
+
+        plt.legend()
+
+        plt.xlabel("Normalization Factor",fontsize=20)
+        plt.ylabel("Atmospheric escape rate (kg/s)",fontsize=20)
+        plt.grid(True, which="both", ls="--", alpha=0.8)
+
+        save_plot(plt, "ST", f"merged_1variable_study_standard_planets_eta={eta}_distance={distance}m_r_xuv_factor={r_xuv_factor}")
+
+
 def main():
     resolution = 400
 
@@ -77,7 +103,7 @@ def main():
 
     star = "Sun"
     l_bol = L_sun.value
-    eta = 0.3
+    eta = 0.1
     distances = ((np.logspace(-1, 1, resolution))*u.AU).to_value(u.m)
     r_xuv_min = 1 ; r_xuv_max = 10   #How many times the planets atmosphere is the planets radii
     r_xuv_factors = np.logspace(np.log10(r_xuv_min), np.log10(r_xuv_max), resolution)
@@ -92,7 +118,8 @@ def main():
     l_bols = np.logspace(-1, 1, resolution)*L_sun.value
     parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance)
 
-
+    normalization_factor = np.linspace(0.1, 10, resolution)
+    merged_1variable_studies(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distance,normalization_factor)
 
 
 if __name__=="__main__":
