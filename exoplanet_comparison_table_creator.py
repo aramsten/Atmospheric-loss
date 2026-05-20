@@ -1,7 +1,8 @@
 from Data_management import nasa_exoplanet_download
-from Data_management.file_manager import save_catalog
+from Data_management.file_manager import apply_units, save_catalog
 import numpy as np
 from astropy import units as u
+from Data_management.planet_creator import add_planets_from_our_star_system
 import exoplanet_table_creator as etc
 from astropy.table import vstack
 
@@ -47,6 +48,8 @@ def change_lq_and_tsat_for_specific_star(catalog, star, lq, t_sat):
 def main():
     initials = "AR"
     catalog = nasa_exoplanet_download.main()
+    catalog = add_planets_from_our_star_system(catalog)
+    catalog = apply_units(catalog)
 
     star = "TRAPPIST-1"
     star_shortname = "T1"

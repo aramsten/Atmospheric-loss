@@ -7,6 +7,18 @@ from Data_management.planet_creator import add_planets_from_our_star_system
 from astropy.constants import R_sun, L_sun, M_sun, M_earth, R_earth
 
 def download_NASA_exoplanet_catalog(query):
+  """Downloads the NASA exoplanet catalog form the exoplanet archive using the provided query and returns it as an astropy Table.
+  
+  Parameters
+  ----------  
+  query : str
+      The SQL query to be executed on the NASA exoplanet archive.
+  
+  Returns
+  -------
+  catalog : Table
+      An astropy Table containing the results of the query.
+  """
   exocat = pyvo.dal.TAPService("https://exoplanetarchive.ipac.caltech.edu/TAP")
   result = exocat.search(query)
   catalog = result.to_table()

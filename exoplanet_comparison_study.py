@@ -21,7 +21,12 @@ def atmosphere_color(name):
     if name == "Earth": return "green"
     if name == "Venus": return "green"
     if name == "Mars": return "orange"
+    if name == "Jupiter": return "green"
+    if name == "The Moon": return "red"
     if name == "Mercury": return "red"
+    if name == "Saturn": return "green"
+    if name == "Uranus": return "green"
+    if name == "Neptune": return "green"
 
     # TRAPPIST-1
     if name == "TRAPPIST-1 b": return "red"
