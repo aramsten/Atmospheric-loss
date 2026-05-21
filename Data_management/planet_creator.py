@@ -86,18 +86,15 @@ def add_planets_from_our_star_system(catalog):
     https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
     https://www.esa.int/Science_Exploration/Space_Science/Venus_Express/Venus_compared_to_Earth
     https://www.esa.int/Science_Exploration/Space_Science/Mars_Express/Facts_about_Mars
-    https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Exploration/Highlights/Moon_facts
-    https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/moon/#moon
+    https://sci.esa.int/web/solar-system/-/35850-the-moon
     https://www.esa.int/Science_Exploration/Space_Science/Juice/Facts_about_Jupiter
-    https://www.esa.int/Science_Exploration/Space_Science/Cassini-Huygens/Facts_about_Saturn
     https://www.nasa.gov/wp-content/uploads/2023/05/saturn-lithograph.pdf
-    https://science.nasa.gov/uranus/facts/#h-size-and-distance
     https://sci.esa.int/web/solar-system/-/35653-uranus
     https://science.nasa.gov/neptune/neptune-facts/#h-size-and-distance
     """
-    planet_masses = [1.0, 0.055, 0.814, 0.11, 0.01, 318.0, 95.16, 14.536, 17.147]  # Earth masses
-    planet_radii = [1.0, 0.383, 0.949, 0.533, 0.273, 11, 9.46, 4.01, 3.887]
-    planet_distance = [1.0, 0.4, 0.72, 1.52, 1.0, 5.2, 9.6, 19, 30]
+    planet_masses = [1.0, 0.055, 0.814, 0.11, 0.0123, 318.0, 95.16, 14.536, 17.147]  # Earth masses
+    planet_radii = [1.0, 0.383, 0.949, 0.533, 0.2725, 11, 9.46, 4.007, 3.887]
+    planet_distance = [1.0, 0.4, 0.72, 1.52, 1.0, 5.2, 9.6, 19.182, 30]
     catalog = add_planets_from_star_system(catalog, planets, planet_masses, planet_radii, planet_distance)
 
     catalog = cc.add_escape_velocity(catalog, "pl_masse", "pl_rade")
