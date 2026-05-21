@@ -75,7 +75,7 @@ def parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distanc
         The end time of the period.
     t_sat : astropy.units.Quantity
         The saturation age of the star."""
-    plot_creator = Plot2D_creator(distances)
+    plot_creator = Plot2D_creator(distances, fontsize=25)
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
@@ -114,7 +114,7 @@ def parametric_r_xuv_factor(planets,m_p,r_p,r_xuv_factors,eta,l_bol,l_q,gamma,di
         The end time of the period.
     t_sat : astropy.units.Quantity
         The saturation age of the star."""
-    plot_creator = Plot2D_creator(r_xuv_factors)
+    plot_creator = Plot2D_creator(r_xuv_factors, fontsize=25)
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factors * r_p[i]
@@ -152,7 +152,7 @@ def parametric_heating_efficiency(planets,m_p,r_p,r_xuv_factor,etas,l_bol,l_q,ga
         The end time of the period.
     t_sat : astropy.units.Quantity
         The saturation age of the star."""
-    plot_creator = Plot2D_creator(etas)
+    plot_creator = Plot2D_creator(etas, fontsize=25)
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
@@ -190,7 +190,7 @@ def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,l_q,gamma,distance,
         The end time of the period.
     t_sat : astropy.units.Quantity
         The saturation age of the star."""
-    plot_creator = Plot2D_creator(l_bols)
+    plot_creator = Plot2D_creator(l_bols, fontsize=25)
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
@@ -202,7 +202,7 @@ def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,l_q,gamma,distance,
     save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_l_bol_r_xuv_factor={r_xuv_factor}_eta={eta}_distance={distance}m")
 
 def parametric_starlife_our_system_study(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distance,t_ends,t_sat):
-    plot_creator = Plot2D_creator(t_ends/(4.603*10**9))
+    plot_creator = Plot2D_creator(t_ends/(4.603*10**9), fontsize=25)
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
@@ -214,7 +214,7 @@ def parametric_starlife_our_system_study(planets,m_p,r_p,r_xuv_factor,eta,l_bol,
     save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_starlife_r_xuv_factor={r_xuv_factor}_eta={eta}_distance={distance}m")
 
 def parametric_startype_study(stars,m_p,r_p,r_xuv_factor,eta,l_bols,l_qs,gamma,distance,t_ends,t_sats):
-    plot_creator = Plot2D_creator(t_ends/(4.603*10**9))
+    plot_creator = Plot2D_creator(t_ends/(4.603*10**9), fontsize=25)
 
     for i in range(len(stars)):
         r_xuv = r_xuv_factor * r_p
