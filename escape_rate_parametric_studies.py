@@ -82,30 +82,30 @@ def merged_1variable_studies(planets:list,m_p:list,r_p:list,r_xuv_factor:float,e
             "Heating efficiency": "-.",
             "Bolometric Luminosity": ":"
         }
-
+        markers=["o","s","^","D","P","X"]
         for i in range(len(planets)):
             r_xuv = normalization_factor * r_p[i]
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],l_bol)
-            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir[r"$R_{\mathrm{XUV}} / R_p$"])
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir[r"$R_{\mathrm{XUV}} / R_p$"], marker=markers[i], markevery=len(normalization_factor)//10+i)
             r_xuv = r_xuv_factor * r_p[i]
 
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,normalization_factor,m_p[i],r_p[i],l_bol)
-            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Heating efficiency"])
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Heating efficiency"], marker=markers[i], markevery=len(normalization_factor)//10+i)
 
             y_axis = atmospheric_escaperates_calculator(normalization_factor,r_xuv,eta,m_p[i],r_p[i],l_bol)
-            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Distance"])
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Distance"], marker=markers[i], markevery=len(normalization_factor)//10+i)
 
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],normalization_factor)
-            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Bolometric Luminosity"])
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Bolometric Luminosity"], marker=markers[i], markevery=len(normalization_factor)//10+i)
 
         legend_elements = []
         for variable, linestyle in line_dir.items():
             legend_elements.append(Line2D([0], [0], color="black", lw=2, linestyle=linestyle, label=f"{variable}"))
         for i in range(len(planets)):
             color = colors[i]
-            legend_elements.append(Line2D([0], [0], color=color, lw=2, label=f"{planets[i]}"))
+            legend_elements.append(Line2D([0], [0], color=color, lw=2, label=f"{planets[i]}", marker=markers[i]))
 
-        plt.legend(handles=legend_elements, loc="best", fontsize="small")
+        plt.legend(handles=legend_elements, loc="upper right", fontsize="small")
         plt.xscale("log")
         plt.yscale("log")
         plt.xlabel("Normalization Factor",fontsize=20)
@@ -141,7 +141,7 @@ def main():
     distances = ((np.logspace(-1, 1, resolution))*u.AU).to_value(u.m)
     r_xuv_min = 1 ; r_xuv_max = 10   #How many times the planets atmosphere is the planets radii
     r_xuv_factors = np.logspace(np.log10(r_xuv_min), np.log10(r_xuv_max), resolution)
-    calculate_multiple_planets(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors, resolution)
+    calculate_multiple_planets_parametric_study_r_xuv_distance(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors, resolution)
 
     r_xuv_factor = 1
     parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distances)
@@ -152,7 +152,7 @@ def main():
     l_bols = np.logspace(-1, 1, resolution)*L_sun.value
     parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance)
 
-    normalization_factor = np.linspace(0.1, 10**26, resolution)
+    normalization_factor = np.logspace(np.log10(0.1), 30, resolution)
     merged_1variable_studies(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distance,normalization_factor)
 
 
