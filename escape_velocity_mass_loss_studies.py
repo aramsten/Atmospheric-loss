@@ -357,7 +357,7 @@ def star_age_plots(catalog, initials, R_xuv, eta, protoatmosphere_mass_fraction,
         save_plot(cosmic_shoreline_plot, initials, f"cosmic_shoreline-spectral_types-{shoreline_position_text}-at-t=star_age-rxuv_factor={R_xuv}-eta={eta}")
 
 def main():
-    table_name = "260520_21.27_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
+    table_name = "260521_23.59_ST_Catalog_mass_loss_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
 
     catalog = ascii.read(f"Tables/{table_name}")
     initials = "AR"
