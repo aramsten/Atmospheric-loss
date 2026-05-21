@@ -88,6 +88,7 @@ def merged_1variable_studies(planets:list,m_p:list,r_p:list,r_xuv_factor:float,e
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],l_bol)
             plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir[r"$R_{\mathrm{XUV}} / R_p$"])
             r_xuv = r_xuv_factor * r_p[i]
+
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,normalization_factor,m_p[i],r_p[i],l_bol)
             plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Heating efficiency"])
 
@@ -102,9 +103,10 @@ def merged_1variable_studies(planets:list,m_p:list,r_p:list,r_xuv_factor:float,e
             legend_elements.append(Line2D([0], [0], color="black", lw=2, linestyle=linestyle, label=f"{variable}"))
         for i in range(len(planets)):
             color = colors[i]
-            legend_elements.append(Line2D([0], [0], color=color, lw=2, label=f"{planets[i]})"))
+            legend_elements.append(Line2D([0], [0], color=color, lw=2, label=f"{planets[i]}"))
 
-        plt.legend(handles=legend_elements, loc="best")
+        plt.legend(handles=legend_elements, loc="best", fontsize="small")
+        plt.xscale("log")
         plt.yscale("log")
         plt.xlabel("Normalization Factor",fontsize=20)
         plt.ylabel("Atmospheric escape rate (kg/s)",fontsize=20)
@@ -150,7 +152,7 @@ def main():
     l_bols = np.logspace(-1, 1, resolution)*L_sun.value
     parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance)
 
-    normalization_factor = np.linspace(0.1, 10, resolution)
+    normalization_factor = np.linspace(0.1, 10**9, resolution)
     merged_1variable_studies(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distance,normalization_factor)
 
 
