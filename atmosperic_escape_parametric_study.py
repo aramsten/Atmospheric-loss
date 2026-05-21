@@ -201,19 +201,29 @@ def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,l_q,gamma,distance,
 
     save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_l_bol_r_xuv_factor={r_xuv_factor}_eta={eta}_distance={distance}m")
 
-def parametric_starlife_study(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distance,t_ends,t_sat):
-    plot_creator = Plot2D_creator(t_ends/(4.603*u.Gyr))
+def parametric_starlife_our_system_study(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distance,t_ends,t_sat):
+    plot_creator = Plot2D_creator(t_ends/(4.603*10**9))
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
         y_axis, _, _ = calculate_total_mass_loss(eta, m_p[i], r_xuv, r_p[i], l_bol, l_q, t_sat.to(u.s), t_ends.to(u.s), gamma, distance)
         y_axis = y_axis/m_p[i]/0.01
         plot_creator.append_y_axis(y_axis)
-    plot = plot_creator.create_2D_plot(x_label=r"End time $t_{\mathrm{end}}$/Sun Age",y_label=r"$M_{loss}$ / 1%$M_\mathrm{planet}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
+    plot = plot_creator.create_2D_plot(x_label=r"Time (yr)/Sun Age",y_label=r"$M_{loss}$ / 1%$M_\mathrm{planet}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
 
     save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_starlife_r_xuv_factor={r_xuv_factor}_eta={eta}_distance={distance}m")
 
-    
+def parametric_startype_study(stars,m_p,r_p,r_xuv_factor,eta,l_bols,l_qs,gamma,distance,t_ends,t_sats):
+    plot_creator = Plot2D_creator(t_ends/(4.603*10**9))
+
+    for i in range(len(stars)):
+        r_xuv = r_xuv_factor * r_p
+        y_axis, _, _ = calculate_total_mass_loss(eta, m_p, r_xuv, r_p, l_bols[i], l_qs[i], t_sats[i].to(u.s), t_ends.to(u.s), gamma, distance)
+        y_axis = y_axis/m_p/0.01
+        plot_creator.append_y_axis(y_axis)
+    plot = plot_creator.create_2D_plot(x_label=r"Time (yr)/Sun Age",y_label=r"$M_{loss}$ / 1%$M_\mathrm{\oplus}$",label=stars,x_logscale=True,y_logscale=True,view_legend=True)
+
+    save_plot(plot, "ST", f"atmospheric_escape_parametric_study_startype_study_r_xuv_factor={r_xuv_factor}_eta={eta}_distance={distance}m_planet_Earth") 
 
 def main():
     resolution = 400
@@ -235,6 +245,7 @@ def main():
     r_mars = 0.53*R_earth.value
     r_p = np.array([r_mercury, r_venus, r_sub_earth, r_earth, r_super_earth, r_mars])
 
+
     r_xuv_factor = 1
     eta = 0.1 #Heating efficiency
     distances = ((np.logspace(-1, 1, resolution))*u.AU).to_value(u.m)
@@ -245,6 +256,11 @@ def main():
     gamma = 1.23 #Power law index for the decay of the xuv luminos
     t_end = 4.603*u.Gyr #Time in years
     t_sat = 100*u.Myr #Saturation time in years
+
+    stars = ["Sun(G2V)","AB Pic (K2V)","AF Lep (F8)","AU Mic (M1V)","GJ 1061 (M5.5V)"]
+    t_sats = [t_sat, 100*u.Myr, 100*u.Myr, 600*u.Myr, 600*u.Myr]
+    l_qs = [l_q, 1e-3, 1e-3, 1e-3, 1e-4]
+    l_bols = [l_bol, 0.59387*L_sun.value, 1.94984*L_sun.value, 0.1053*L_sun.value, 0.0017*L_sun.value]
 
     r_xuv_min = 1 ; r_xuv_max = 10   #How many times the planets atmosphere is the planets radii
     r_xuv_factors = np.logspace(np.log10(r_xuv_min), np.log10(r_xuv_max), resolution)
@@ -258,8 +274,10 @@ def main():
     parametric_heating_efficiency(planets,m_p,r_p,r_xuv_factor,etas,l_bol,l_q,gamma,distance,t_end,t_sat)
     l_bols = np.logspace(-1, 1, resolution)*L_sun.value
     parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,l_q,gamma,distance,t_end,t_sat)
-    t_ends = np.logspace(np.log10(10**6), np.log10(10**10), resolution)*u.yr
-    parametric_starlife_study(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distance,t_ends,t_sat)
+    t_ends = np.logspace(np.log10(10**6), np.log10(10**11), resolution)*u.yr
+    parametric_starlife_our_system_study(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distance,t_ends,t_sat)
+
+    parametric_startype_study(stars,m_p[0],r_p[0],r_xuv_factor,eta,l_bols,l_qs,gamma,distance,t_ends,t_sats)
 
 
 
