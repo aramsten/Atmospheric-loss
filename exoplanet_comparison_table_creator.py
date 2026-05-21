@@ -47,8 +47,9 @@ def change_lq_and_tsat_for_specific_star(catalog, star, lq, t_sat):
 
 def main():
     initials = "AR"
+    planets = ["Earth", "Mercury", "Venus", "Mars"]
     catalog = nasa_exoplanet_download.main()
-    catalog = add_planets_from_our_star_system(catalog)
+    catalog = add_planets_from_our_star_system(catalog, planets)
     catalog = apply_units(catalog)
 
     star = "TRAPPIST-1"
@@ -60,7 +61,7 @@ def main():
     suffixes = ["Birky low", "Birky", "Birky high"]
     specific_lq = [10**-(3.03+0.25), 10**-3.03, 10**-(3.03-0.23)]
     specific_t_sat = [3.14-1.46, 3.14, 3.14+2.22] # Gyr
-    specific_gamma = [1.17+0.27, 1.17, 1.17-0.28]
+    specific_gamma = [1.17+0.28, 1.17, 1.17-0.27]
 
     end_time = np.array([0.1, 0.6, 1, 5, 10])  # Gyr
     output = "fraction"  # "mass" or "fraction"

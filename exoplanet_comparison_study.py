@@ -50,11 +50,12 @@ def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model
         ax.scatter(x_base.value[i], y_base[i],
                    color=color, marker="o", s=40, zorder=3)
 
-        ax.text(x_base.value[i] * 1.05,
+        ax.text(x_base.value[i] * 1.02,
                 y_base[i] * 0.8,
                 short_label(name, star, star_shortname),
                 fontsize=7,
                 color="black",
+                fontweight="bold",
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0))
 
     # Compared model
@@ -84,11 +85,12 @@ def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model
             zorder=4
         )
 
-        ax.text(x_nom * 1.05,
+        ax.text(x_nom * 1.02,
                 y_nom * 1.05,
                 short_label(name, star, star_shortname),
                 fontsize=7,
                 color="black",
+                fontweight="bold",
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0.5))
 
     # Axis settings
@@ -106,7 +108,7 @@ def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model
     ax.set_ylim(y_min * (1-plot_margin), y_max * (1+plot_margin))
 
     # SHoreline
-    shoreline_position_text = draw_shoreline(ax, catalog, x_base, y_base)
+    shoreline_position_text = draw_shoreline(ax, catalog, x_base, y_base, color="blue", alpha=0.5)
     x_pos = 4.2
     y_pos = 0.23
     ax.text(x_pos, y_pos,
@@ -153,6 +155,7 @@ def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_
                 short_label(name, star, star_shortname),
                 fontsize=7,
                 color="black",
+                fontweight="bold",
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0))
 
     # Compared model
@@ -189,6 +192,7 @@ def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_
                 short_label(name, star, star_shortname),
                 fontsize=7,
                 color="black",
+                fontweight="bold",
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0.5))
 
     # Axis settings
@@ -247,7 +251,7 @@ def draw_mass_loss_lines_for_comparison(ax, catalog, eta, x_axis, y_axis, fracti
     for f in fractions:
         m = (d_earth ** 2 / (eta * E_xuv_sun)) * (8 * np.pi / (3 * G))**0.5 * f *(v_earth) ** 3 * (rho_earth)**0.5
         y_line = m * x_vals
-        ax.plot(x_vals, y_line, linestyle="--", color="blue", alpha=0.3, zorder=1)
+        ax.plot(x_vals, y_line, linestyle="--", color="blue", alpha=0.5, zorder=1)
         x_pos = x_vals[15] if f != 0.0002 else x_vals[80]
         y_pos = y_line[15] if f != 0.0002 else y_line[82]
         ax.text(x_pos, y_pos,
@@ -289,7 +293,7 @@ def short_label(name, star, star_shortname):
 def main():
     initials = "AR"
 
-    table_name = "260426_10.17_AR_Catalog_comparison_TRAPPIST-1_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
+    table_name = "260521_23.17_AR_Catalog_comparison_TRAPPIST-1_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
     catalog = ascii.read(f"Tables/{table_name}")
     fontsize = 16
     eta = catalog.meta["eta"]

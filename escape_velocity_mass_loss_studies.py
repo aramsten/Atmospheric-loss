@@ -204,7 +204,7 @@ def draw_mass_loss_lines(ax, catalog, eta, x_axis, y_axis, fractions):
                 )
 
 
-def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", factor_over_reference=1.1):
+def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", reference="Mars", color="black", alpha=1.0, factor_over_reference=1.1):
     vmin, vmax = ax.get_xlim()
 
     reference_idx = np.where(catalog[planetname_column] == reference)[0][0]
@@ -215,7 +215,7 @@ def draw_shoreline(ax, catalog, x_axis, y_axis, planetname_column="pl_name", ref
     y1 = C * vmin**4
     y2 = C * vmax**4
 
-    ax.plot([vmin, vmax], [y1, y2], "--", color="black", linewidth=1.5)
+    ax.plot([vmin, vmax], [y1, y2], "--", color=color, alpha=alpha, linewidth=1.5)
     if factor_over_reference == 1:
         shoreline_position_text = f"through-{reference}"
     else:

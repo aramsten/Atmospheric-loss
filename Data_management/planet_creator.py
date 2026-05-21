@@ -66,7 +66,9 @@ def add_planets_from_star_system(catalog, pl_names, pl_masses, pl_radii, pl_orbs
 
     return catalog
 
-def add_planets_from_our_star_system(catalog):
+def add_planets_from_our_star_system(catalog,
+                                     planets = ["Earth","Mercury","Venus","Mars","Moon","Jupiter","Saturn","Uranus","Neptune"]
+):
     """Add planets from our star system to the catalog with their respective properties.
     
     Parameters
@@ -80,12 +82,12 @@ def add_planets_from_our_star_system(catalog):
         The updated catalog with the added planets.
     """
 
-    planets = ["Earth","Mercury","Venus","Mars","Moon", "Jupiter","Saturn","Uranus","Neptune"]
     """
     Data sources:
     https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Meet_Mercury
     https://www.esa.int/Science_Exploration/Space_Science/Venus_Express/Venus_compared_to_Earth
     https://www.esa.int/Science_Exploration/Space_Science/Mars_Express/Facts_about_Mars
+    https://sci.esa.int/web/solar-system/-/35850-the-moon
     https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Exploration/Highlights/Moon_facts
     https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/moon/#moon
     https://www.esa.int/Science_Exploration/Space_Science/Juice/Facts_about_Jupiter
