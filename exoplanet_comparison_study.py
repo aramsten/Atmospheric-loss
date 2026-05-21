@@ -35,7 +35,7 @@ def atmosphere_color(name):
 
     return "gray"
 
-def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model_name, star, star_shortname):
+def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model_name, star, star_shortname, fontsize):
     base = catalog[catalog["variation_id"] == "baseline"]
     model = catalog[catalog["model_id"] == model_name]
 
@@ -94,8 +94,8 @@ def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model
     # Axis settings
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label,fontsize=fontsize)
+    ax.set_ylabel(y_label,fontsize=fontsize)
 
     ax.grid(True, which="both", linestyle="--", linewidth=0.6, alpha=0.7)
 
@@ -125,7 +125,7 @@ def plot_cosmic_shoreline_regular(catalog, colname, x_label, y_label, eta, model
     return fig, shoreline_position_text
 
 
-def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_name, star, star_shortname):
+def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_name, star, star_shortname,fontsize):
     base = catalog[catalog["variation_id"] == "baseline"]
     model = catalog[catalog["model_id"] == model_name]
 
@@ -194,8 +194,8 @@ def plot_cosmic_shoreline_models(catalog, colname, x_label, y_label, eta, model_
     # Axis settings
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label,fontsize=fontsize)
+    ax.set_ylabel(y_label,fontsize=fontsize)
 
     ax.grid(True, which="both", linestyle="--", linewidth=0.6, alpha=0.7)
 
@@ -291,6 +291,7 @@ def main():
 
     table_name = "260426_10.17_AR_Catalog_comparison_TRAPPIST-1_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
     catalog = ascii.read(f"Tables/{table_name}")
+    fontsize = 16
     eta = catalog.meta["eta"]
     R_xuv = catalog.meta["R_xuv"]
     model_name = catalog.meta["Model"]
@@ -307,7 +308,8 @@ def main():
         eta,
         model_name,
         star,
-        star_shortname
+        star_shortname,
+        fontsize
     )
     save_plot(plot, initials, plot_name)
 
@@ -319,7 +321,8 @@ def main():
         eta,
         model_name,
         star,
-        star_shortname
+        star_shortname,
+        fontsize
     )
     save_plot(plot, initials, f"{shoreline_position_text}_{plot_name}")
 
