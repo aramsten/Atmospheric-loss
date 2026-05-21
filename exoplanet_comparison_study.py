@@ -293,7 +293,7 @@ def short_label(name, star, star_shortname):
 def main():
     initials = "AR"
 
-    table_name = "260521_23.17_AR_Catalog_comparison_TRAPPIST-1_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
+    table_name = "260522_00.05_AR_Catalog_comparison_TRAPPIST-1_for_0.1-10.0_Gyr_eta-0.1_Rxuv-1.0.ecsv"
     catalog = ascii.read(f"Tables/{table_name}")
     fontsize = 16
     eta = catalog.meta["eta"]
