@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from Plot_tools.plot_creator import Plot2D_creator, Six_3Dplot_creator, save_plot
 from Calculators.function_solvers import atmospheric_escaperates_calculator
 from astropy import units as u
+from matplotlib.lines import Line2D
 
 def calculate_multiple_planets(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors, resolution):
     plot_creator = Six_3Dplot_creator(distances,r_xuv_factors, resolution,fontsize=20)
@@ -55,25 +56,56 @@ def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance):
     plot = plot_creator.create_2D_plot(x_label=r"Bolometric Luminosity $L_{\mathrm{bol}}$ / $L_{\odot}$",y_label="Atmospheric escape rate (kg/s)",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_l_bol_standard_planets_eta={eta}_distance={distance}m_r_xuv_factor={r_xuv_factor}")
 
-def merged_1variable_studies(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distance,normalization_factor):
+def merged_1variable_studies(planets:list,m_p:list,r_p:list,r_xuv_factor:float,eta:float,l_bol:float,distance:float,normalization_factor:list):
+        """Creates a plot that compined parametric studies of the distance, r_xuv_factor, heating efficiency and bolometric luminosity. The x-axis is a normalization factor that is applied to one of the varriables.
+        
+        Parameters
+        ---
+        planets: list of planet names
+        m_p: list of planet masses in kg
+        r_p: list of planet radii in m
+        r_xuv_factor: the factor that multiplies the planet radius to get the xuv radius
+        eta: heating efficiency
+        l_bol: bolometric luminosity in W
+        distance: distance from the star in meters
+        normalization_factor: list of values to normalize the x-axis
+
+        Output
+        ---
+        A plot saved to the folder "Plots"
+        """
         plt.clf()
         colors = plt.cm.viridis(np.linspace(0, 1, len(planets)))
+        line_dir = {
+            "Distance": "-",
+            r"$R_{\mathrm{XUV}} / R_p$": "--",
+            "Heating efficiency": "-.",
+            "Bolometric Luminosity": ":"
+        }
+
         for i in range(len(planets)):
             r_xuv = normalization_factor * r_p[i]
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],l_bol)
-            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle="-")
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir[r"$R_{\mathrm{XUV}} / R_p$"])
             r_xuv = r_xuv_factor * r_p[i]
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,normalization_factor,m_p[i],r_p[i],l_bol)
-            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle="--")
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Heating efficiency"])
 
             y_axis = atmospheric_escaperates_calculator(normalization_factor,r_xuv,eta,m_p[i],r_p[i],l_bol)
-            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle="-.")
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Distance"])
 
             y_axis = atmospheric_escaperates_calculator(distance,r_xuv,eta,m_p[i],r_p[i],normalization_factor)
-            plt.plot(normalization_factor,y_axis,label=planets[i],linewidth=2, color=colors[i], linestyle=":")
+            plt.plot(normalization_factor,y_axis,linewidth=2, color=colors[i], linestyle=line_dir["Bolometric Luminosity"])
 
-        plt.legend()
+        legend_elements = []
+        for variable, linestyle in line_dir.items():
+            legend_elements.append(Line2D([0], [0], color="black", lw=2, linestyle=linestyle, label=f"{variable}"))
+        for i in range(len(planets)):
+            color = colors[i]
+            legend_elements.append(Line2D([0], [0], color=color, lw=2, label=f"{planets[i]})"))
 
+        plt.legend(handles=legend_elements, loc="best")
+        plt.yscale("log")
         plt.xlabel("Normalization Factor",fontsize=20)
         plt.ylabel("Atmospheric escape rate (kg/s)",fontsize=20)
         plt.grid(True, which="both", ls="--", alpha=0.8)
