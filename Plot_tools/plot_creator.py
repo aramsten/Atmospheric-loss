@@ -185,7 +185,7 @@ class Six_3Dplot_creator(Plot3D_creator):
 
         self.norm = colors.LogNorm(vmin=vmin, vmax=vmax)
 
-    def six_window_plot(self,planet):
+    def six_window_plot(self,planet,x_label="Distance from star (AU)",y_label=r"$R_{\mathrm{XUV}} / R_p$",color_label="Atmospheric Escape Rate (kg/s)"):
         fig, axs = plt.subplots(2, 3, figsize=(12, 8), constrained_layout=True)
 
         for ax, data, title in zip(axs.flat, self.z_meshes, planet):
@@ -199,12 +199,12 @@ class Six_3Dplot_creator(Plot3D_creator):
             plt.rc('font', size=self.fontsize)
 
             ax.set_title(title)
-            ax.set_xlabel("Distance to star (AU)", fontsize=self.fontsize)
-            ax.set_ylabel(r"$R_{\mathrm{XUV}} / R_p$", fontsize=self.fontsize)
+            ax.set_xlabel(x_label, fontsize=self.fontsize)
+            ax.set_ylabel(y_label, fontsize=self.fontsize)
             ax.set_xscale("log")
             ax.grid(True, which="both", ls="--", alpha=0.8)
 
-        fig.colorbar(mesh, ax=axs, orientation='vertical', fraction=0.02, pad=0.02, label="Atmospheric Escape Rate (kg/s)")
+        fig.colorbar(mesh, ax=axs, orientation='vertical', fraction=0.02, pad=0.02, label=color_label)
         return plt
 
 

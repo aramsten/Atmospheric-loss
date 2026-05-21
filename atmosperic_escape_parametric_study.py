@@ -1,25 +1,207 @@
 from astropy.constants import L_sun,M_earth,R_earth
 import numpy as np
-from Plot_tools.plot_creator import Plot3D_creator,Plot2D_creator, save_plot
+from Plot_tools.plot_creator import Plot2D_creator, Six_3Dplot_creator, save_plot
 from Calculators.function_solvers import calculate_total_mass_loss
 from astropy import units as u
 
+def calculate_multiple_planets_parametric_study_r_xuv_distance_eta(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors,l_q,t_sat, t_end, gamma, resolution):
+    """Creates a plot of the atmospheric escape rate as a function of the distance from the star and the r_xuv_factor for multiple planets.
+    
+    Parameters
+    ----------
+    planets : list
+        A list of the names of the planets.
+    m_p : list
+        A list of the masses of the planets in kg.
+    r_p : list
+        A list of the radii of the planets in m.
+    eta : float
+        The planets' heating efficiency.
+    l_bol : float
+        The stars' bolometric luminosity in W.
+    distances : numpy.ndarray
+        An array of distances from the star in m.
+    r_xuv_factors : numpy.ndarray
+        An array of factors for the XUV radius.
+    l_q : float
+        The fraction of the bolometric luminosity that is emitted in XUV.
+    t_sat : astropy.units.Quantity
+        The saturation age of the star.
+    t_end : astropy.units.Quantity
+        The end time of the period.
+    gamma : float
+        The power law index for the unsaturated phase.
+    resolution : int
+        The resolution of the mesh.
+    """
+    plot_creator = Six_3Dplot_creator(distances,r_xuv_factors, resolution,fontsize=20)
+    distances_mesh, r_xuv_factors_mesh = plot_creator.create_mesh()
+
+    for i in range(len(planets)):
+        r_xuv_mesh = r_xuv_factors_mesh * r_p[i]
+        mass_loss_mesh,_,_ = calculate_total_mass_loss(eta, m_p[i], r_xuv_mesh, r_p[i], l_bol, l_q, t_sat.to(u.s), t_end.to(u.s), gamma, distances_mesh)
+        mass_loss_mesh = mass_loss_mesh/m_p[i]/0.01
+        plot_creator.add_z_mesh(mass_loss_mesh)
+    plot_creator.normalize_AU(normalize_x_axis=True)
+    plot_creator.add_norm()
+    plot=plot_creator.six_window_plot(planets,"Distance from star (AU)",r"$R_{\mathrm{XUV}} / R_p$",r"$M_{loss}$ / 1%$M_\mathrm{planet}$")
+
+    save_plot(plot, "ST", f"atmospheric_escape_parametric_study_r_xuv_distance_eta={eta}")
+
 def parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distances,t_end,t_sat):
+    """Creates a plot of the atmospheric escape rate as a function of the distance from the star for multiple planets.
+    
+    parameters
+    ----------
+    planets : list
+        A list of the names of the planets.
+    m_p : list
+        A list of the masses of the planets in kg.
+    r_p : list
+        A list of the radii of the planets in m.
+    r_xuv_factor : float
+        The factor for the XUV radius.
+    eta : float
+        The planets' heating efficiency.
+    l_bol : float
+        The stars' bolometric luminosity in W.
+    l_q : float
+        The fraction of the bolometric luminosity that is emitted in XUV.
+    gamma : float
+        The power law index for the unsaturated phase.
+    distances : numpy.ndarray
+        An array of distances from the star in m.
+    t_end : astropy.units.Quantity
+        The end time of the period.
+    t_sat : astropy.units.Quantity
+        The saturation age of the star."""
     plot_creator = Plot2D_creator(distances)
 
     for i in range(len(planets)):
         r_xuv = r_xuv_factor * r_p[i]
-        y_axis = np.array([])
-        for distance in distances:
-            y_value, _, _ = calculate_total_mass_loss(eta, m_p[i], r_xuv, r_p[i], l_bol, l_q, t_sat.to(u.s), t_end.to(u.s), gamma, distance)
-            y_axis = np.append(y_axis, y_value.value)
-        y_axis = y_axis/m_p[i]/0.001
+        y_axis, _, _ = calculate_total_mass_loss(eta, m_p[i], r_xuv, r_p[i], l_bol, l_q, t_sat.to(u.s), t_end.to(u.s), gamma, distances)
+        y_axis = y_axis/m_p[i]/0.01
         plot_creator.append_y_axis(y_axis)
     plot_creator.normalize_AU(normalize_x_axis=True)
-    plot = plot_creator.create_2D_plot(x_label="Distance from star (AU)",y_label=r"$M_{loss}$ / 1%$M_{\oplus}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
+    plot = plot_creator.create_2D_plot(x_label="Distance from star (AU)",y_label=r"$M_{loss}$ / 1%$M_\mathrm{planet}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
 
     save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_distance_eta={eta}_rxuv_factor={r_xuv_factor}")
 
+def parametric_r_xuv_factor(planets,m_p,r_p,r_xuv_factors,eta,l_bol,l_q,gamma,distance,t_end,t_sat):
+    """Creates a plot of the atmospheric escape rate as a function of the r_xuv_factor for multiple planets.
+    
+    parameters
+    ----------
+    planets : list
+        A list of the names of the planets.
+    m_p : list
+        A list of the masses of the planets in kg.
+    r_p : list
+        A list of the radii of the planets in m.
+    r_xuv_factors : numpy.ndarray
+        An array of factors for the XUV radius.
+    eta : float
+        The planets' heating efficiency.
+    l_bol : float
+        The stars' bolometric luminosity in W.
+    l_q : float
+        The fraction of the bolometric luminosity that is emitted in XUV.
+    gamma : float
+        The power law index for the unsaturated phase.
+    distance : numpy.ndarray
+        An array of distances from the star in m.
+    t_end : astropy.units.Quantity
+        The end time of the period.
+    t_sat : astropy.units.Quantity
+        The saturation age of the star."""
+    plot_creator = Plot2D_creator(r_xuv_factors)
+
+    for i in range(len(planets)):
+        r_xuv = r_xuv_factors * r_p[i]
+        y_axis, _, _ = calculate_total_mass_loss(eta, m_p[i], r_xuv, r_p[i], l_bol, l_q, t_sat.to(u.s), t_end.to(u.s), gamma, distance)
+        y_axis = y_axis/m_p[i]/0.01
+        plot_creator.append_y_axis(y_axis)
+    plot = plot_creator.create_2D_plot(x_label=r"$R_{\mathrm{XUV}} / R_p$",y_label=r"$M_{loss}$ / 1%$M_\mathrm{planet}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
+
+    save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_r_xuv_factor_eta={eta}_distance={distance}m")
+
+def parametric_heating_efficiency(planets,m_p,r_p,r_xuv_factor,etas,l_bol,l_q,gamma,distance,t_end,t_sat):
+    """Creates a plot of the atmospheric escape rate as a function of the heating efficiency for multiple planets.
+    
+    parameters
+    ----------
+    planets : list
+        A list of the names of the planets.
+    m_p : list
+        A list of the masses of the planets in kg.
+    r_p : list
+        A list of the radii of the planets in m.
+    r_xuv_factor : float
+        The factor for the XUV radius.
+    etas : numpy.ndarray
+        An array of heating efficiencies.
+    l_bol : float
+        The stars' bolometric luminosity in W.
+    l_q : float
+        The fraction of the bolometric luminosity that is emitted in XUV.
+    gamma : float
+        The power law index for the unsaturated phase.
+    distance : numpy.ndarray
+        An array of distances from the star in m.
+    t_end : astropy.units.Quantity
+        The end time of the period.
+    t_sat : astropy.units.Quantity
+        The saturation age of the star."""
+    plot_creator = Plot2D_creator(etas)
+
+    for i in range(len(planets)):
+        r_xuv = r_xuv_factor * r_p[i]
+        y_axis, _, _ = calculate_total_mass_loss(etas, m_p[i], r_xuv, r_p[i], l_bol, l_q, t_sat.to(u.s), t_end.to(u.s), gamma, distance)
+        y_axis = y_axis/m_p[i]/0.01
+        plot_creator.append_y_axis(y_axis)
+    plot = plot_creator.create_2D_plot(x_label=r"Heating efficiency $\eta$",y_label=r"$M_{loss}$ / 1%$M_\mathrm{planet}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
+
+    save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_heating_efficiency_r_xuv_factor={r_xuv_factor}_distance={distance}m")
+
+def parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,l_q,gamma,distance,t_end,t_sat):
+    """Creates a plot of the atmospheric escape rate as a function of the bolometric luminosity for multiple planets.
+
+    parameters
+    ----------
+    planets : list
+        A list of the names of the planets.
+    m_p : list
+        A list of the masses of the planets in kg.
+    r_p : list
+        A list of the radii of the planets in m.
+    r_xuv_factor : float
+        The factor for the XUV radius.
+    eta : float
+        The planets' heating efficiency.
+    l_bols : numpy.ndarray
+        An array of bolometric luminosities in W.
+    l_q : float
+        The fraction of the bolometric luminosity that is emitted in XUV.
+    gamma : float
+        The power law index for the unsaturated phase.
+    distance : numpy.ndarray
+        An array of distances from the star in m.
+    t_end : astropy.units.Quantity
+        The end time of the period.
+    t_sat : astropy.units.Quantity
+        The saturation age of the star."""
+    plot_creator = Plot2D_creator(l_bols)
+
+    for i in range(len(planets)):
+        r_xuv = r_xuv_factor * r_p[i]
+        y_axis, _, _ = calculate_total_mass_loss(eta, m_p[i], r_xuv, r_p[i], l_bols, l_q, t_sat.to(u.s), t_end.to(u.s), gamma, distance)
+        y_axis = y_axis/m_p[i]/0.01
+        plot_creator.append_y_axis(y_axis)
+    plot = plot_creator.create_2D_plot(x_label=r"Bolometric luminosity $L_{\mathrm{bol}}$",y_label=r"$M_{loss}$ / 1%$M_\mathrm{planet}$",label=planets,x_logscale=True,y_logscale=True,view_legend=True)
+
+    save_plot(plot, "ST", f"atmospheric_escape_parametric_study_standard_planets_l_bol_r_xuv_factor={r_xuv_factor}_eta={eta}_distance={distance}m")
+
+    
 
 def main():
     resolution = 400
@@ -42,7 +224,7 @@ def main():
     r_p = np.array([r_mercury, r_venus, r_sub_earth, r_earth, r_super_earth, r_mars])
 
     r_xuv_factor = 1
-    eta = 0.3 #Heating efficiency
+    eta = 0.1 #Heating efficiency
     distances = ((np.logspace(-1, 1, resolution))*u.AU).to_value(u.m)
 
     star = "Sun"
@@ -52,7 +234,20 @@ def main():
     t_end = 4.603*u.Gyr #Time in years
     t_sat = 100*u.Myr #Saturation time in years
 
+    r_xuv_min = 1 ; r_xuv_max = 10   #How many times the planets atmosphere is the planets radii
+    r_xuv_factors = np.logspace(np.log10(r_xuv_min), np.log10(r_xuv_max), resolution)
+    calculate_multiple_planets_parametric_study_r_xuv_distance_eta(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors,l_q,t_sat, t_end, gamma, resolution)
+
+    r_xuv_factor = 1
     parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,l_q,gamma,distances,t_end,t_sat)
+    distance = (1*u.AU).to_value(u.m)
+    parametric_r_xuv_factor(planets,m_p,r_p,r_xuv_factors,eta,l_bol,l_q,gamma,distance,t_end,t_sat)
+    etas = np.linspace(0, 1, resolution)
+    parametric_heating_efficiency(planets,m_p,r_p,r_xuv_factor,etas,l_bol,l_q,gamma,distance,t_end,t_sat)
+    l_bols = np.logspace(-1, 1, resolution)*L_sun.value
+    parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,l_q,gamma,distance,t_end,t_sat)
+
+
 
 if __name__=="__main__":
     main()

@@ -6,7 +6,7 @@ from Calculators.function_solvers import atmospheric_escaperates_calculator
 from astropy import units as u
 from matplotlib.lines import Line2D
 
-def calculate_multiple_planets(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors, resolution):
+def calculate_multiple_planets_parametric_study_r_xuv_distance(planets, m_p, r_p, eta, l_bol, distances, r_xuv_factors, resolution):
     plot_creator = Six_3Dplot_creator(distances,r_xuv_factors, resolution,fontsize=20)
     distances_mesh, r_xuv_factors_mesh = plot_creator.create_mesh()
 
@@ -15,7 +15,7 @@ def calculate_multiple_planets(planets, m_p, r_p, eta, l_bol, distances, r_xuv_f
         plot_creator.add_z_mesh(atmospheric_escaperates_calculator(distances_mesh,r_xuv_mesh,eta,m_p[i],r_p[i],l_bol))
     plot_creator.normalize_AU(normalize_x_axis=True)
     plot_creator.add_norm()
-    plot =plot_creator.six_window_plot(planets)
+    plot =plot_creator.six_window_plot(planets,"Distance from star (AU)",r"$R_{\mathrm{XUV}} / R_p$",r"Atmospheric escape rate (kg/s)")
     save_plot(plot, "ST", f"atmospheric_escape_rate_parametric_study_r_xuv_distance_eta={eta}")
 
 def parametric_distance(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distances):
@@ -152,7 +152,7 @@ def main():
     l_bols = np.logspace(-1, 1, resolution)*L_sun.value
     parametric_l_bol(planets,m_p,r_p,r_xuv_factor,eta,l_bols,distance)
 
-    normalization_factor = np.linspace(0.1, 10**9, resolution)
+    normalization_factor = np.linspace(0.1, 10**26, resolution)
     merged_1variable_studies(planets,m_p,r_p,r_xuv_factor,eta,l_bol,distance,normalization_factor)
 
 

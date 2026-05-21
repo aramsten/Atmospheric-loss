@@ -65,7 +65,6 @@ def calculate_l_xuv(l_bol,t=1,t_sat=1, l_q = 1e-4):
     Returns
     ---
     The xuv luminosity of the star"""
-    l_q = 1e-4 #Fraction of the bolometric luminosity that is emitted in xuv.
 
     if t > t_sat:
         xuv_bol = l_q*(t/t_sat)**(-1.23)
