@@ -218,7 +218,6 @@ def parametric_startype_study(stars,m_p,r_p,r_xuv_factor,eta,l_bols,l_qs,gamma,d
     plot_creator = Plot2D_creator(t_ends/(4.603*10**9), fontsize=25)
 
     for i in range(len(stars)):
-        print(f"Star:{stars[i]},l_bol: {l_bols[i]/L_sun.value}, l_q: {l_qs[i]}, t_sat: {t_sats[i]}")
         r_xuv = r_xuv_factor * r_p
         y_axis, _, _ = calculate_total_mass_loss(eta, m_p, r_xuv, r_p, l_bols[i], l_qs[i], t_sats[i].to(u.s), t_ends.to(u.s), gamma, distance)
         y_axis = y_axis/m_p/0.01
@@ -279,7 +278,7 @@ def main():
     l_qs = [l_q, 1e-3, 1e-3, 1e-3, 1e-4]
     l_bols = [l_bol, 0.59387*L_sun.value, 1.94984*L_sun.value, 0.1053*L_sun.value, 0.0017*L_sun.value]
 
-    parametric_startype_study(stars,m_p[0],r_p[0],r_xuv_factor,eta,l_bols,l_qs,gamma,distance,t_ends,t_sats)
+    parametric_startype_study(stars,m_p[3],r_p[3],r_xuv_factor,eta,l_bols,l_qs,gamma,distance,t_ends,t_sats)
 
 
 
